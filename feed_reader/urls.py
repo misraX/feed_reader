@@ -18,8 +18,8 @@ from django.contrib import admin
 from django.urls import include
 from django.urls import path
 from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
 from rest_framework import permissions
-from rest_framework.schemas import get_schema_view
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -29,16 +29,16 @@ schema_view = get_schema_view(
         contact=openapi.Contact(email='maysragamal@gmail.com'),
     ),
     public=True,
-    permission_classes=[permissions.AllowAny],
+    permission_classes=(permissions.AllowAny,),
 )
 urlpatterns = [
     path('admin/', admin.site.urls),
     url(
-        r'^swagger(?P<format>\.json|\.yaml)$',
+        r'^api/v1/docs(?P<format>\.json|\.yaml)$',
         schema_view.without_ui(cache_timeout=0), name='schema-json',
     ),
     url(
-        r'^swagger/$', schema_view.with_ui(
+        r'^api/v1/docs/$', schema_view.with_ui(
             'swagger',
             cache_timeout=0,
         ), name='schema-swagger-ui',

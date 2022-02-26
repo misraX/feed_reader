@@ -49,45 +49,39 @@ class FeedItem(TimeStampedModel):
         return f'{self.feed.name} - {self.title}'
 
 
-class UserFeed(TimeStampedModel):
+class Subscribe(TimeStampedModel):
     user = models.ForeignKey(
         User, verbose_name=_(
             'User',
         ), on_delete=models.CASCADE,
     )
-    feed = models.ForeignKey(
+    feeds = models.ManyToManyField(
         Feed, verbose_name=_(
             'Feed',
-        ), on_delete=models.CASCADE,
+        ),
     )
-    active = models.BooleanField(default=True, verbose_name=_('Active'))
 
     class Meta:
         ordering = ['-created']
 
     def __str__(self):
-        return f'{self.feed.name} - {self.user.username}'
+        return f'{self.user.username}'
 
 
-class UserFeedReader(TimeStampedModel):
+class Reader(TimeStampedModel):
     user = models.ForeignKey(
         User, verbose_name=_(
             'User',
         ), on_delete=models.CASCADE,
     )
-    feed = models.ForeignKey(
-        Feed, verbose_name='feed',
-        on_delete=models.CASCADE,
-    )
-    feed_item = models.ForeignKey(
+    items = models.ManyToManyField(
         FeedItem, verbose_name=_(
             'Feed Item',
-        ), on_delete=models.CASCADE,
+        ),
     )
-    active = models.BooleanField(default=True, verbose_name=_('Active'))
 
     class Meta:
         ordering = ['-created']
 
     def __str__(self):
-        return f'{self.feed_item.title} - {self.user.username}'
+        return f'{self.user.username}'

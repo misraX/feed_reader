@@ -3,7 +3,7 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework.viewsets import ModelViewSet
 
 from apps.feed.serializers import FeedSerializer
-from apps.feed.serializers import UserFeedSerializer
+from apps.feed.serializers import SubscribeSerializer
 
 
 class FeedViewSet(ModelViewSet):
@@ -19,4 +19,4 @@ class SubscribeViewSet(
     """
     User Subscriber for any feed
     """
-    serializer_class = UserFeedSerializer
+    serializer_class = SubscribeSerializer

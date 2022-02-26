@@ -5,14 +5,14 @@ from django.test import TestCase
 
 from apps.feed.models import Feed
 from apps.feed.models import FeedItem
-from apps.feed.models import UserFeed
+from apps.feed.models import Subscribe
 
 
 class ModelTestCase(TestCase):
     def setUp(self) -> None:
         self.feed_model = Feed
         self.feed_item_model = FeedItem
-        self.user_feed_model = UserFeed
+        self.user_feed_model = Subscribe
         self.feed_data: dict = {
             'name': 'washingtonpost',
             'url': 'http://feeds.washingtonpost.com/rss/world',
@@ -48,7 +48,7 @@ class ModelTestCase(TestCase):
         feed = self.feed_model.objects.create(**self.feed_data)
         user = User.objects.create_user(username='string', password='testpass')
 
-        user_feed = self.user_feed_model.objects.create(feed=feed, user=user)
+        user_feed = self.user_feed_model.objects.create(user=user)
+        user_feed.feeds.add(feed)
         self.assertEqual(user_feed.user, user)
-        self.assertEqual(user_feed.feed, feed)
-        self.assertEqual(user_feed.active, True)
+        self.assertEqual(user_feed.feeds.get(id=feed.id), feed)

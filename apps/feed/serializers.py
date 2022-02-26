@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from apps.feed.models import Feed
-from apps.feed.models import UserFeed
+from apps.feed.models import Subscribe
 
 
 class FeedSerializer(serializers.ModelSerializer):
@@ -10,7 +10,7 @@ class FeedSerializer(serializers.ModelSerializer):
         fields = ('name', 'url', 'last_modified', 'created')
 
 
-class UserFeedSerializer(serializers.ModelSerializer):
+class SubscribeSerializer(serializers.ModelSerializer):
     class Meta:
-        model = UserFeed
+        model = Subscribe
         fields = ('user', 'feed', 'created')
