@@ -152,6 +152,13 @@ REST_FRAMEWORK = {
 }
 SWAGGER_SETTINGS = {
     'DEFAULT_API_URL': 'http://localhost',
+    'SECURITY_DEFINITIONS': {
+        'api_key': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header',
+        },
+    },
 }
 # LOGGING
 LOGGING = {

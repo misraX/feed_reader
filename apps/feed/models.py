@@ -54,6 +54,7 @@ class Subscribe(TimeStampedModel):
         User, verbose_name=_(
             'User',
         ), on_delete=models.CASCADE,
+        unique=True,
     )
     feeds = models.ManyToManyField(
         Feed, verbose_name=_(
