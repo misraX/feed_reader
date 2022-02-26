@@ -9,8 +9,6 @@ https://docs.djangoproject.com/en/4.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
-from __future__ import annotations
-
 import os.path
 from pathlib import Path
 
@@ -48,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_extensions',
     'rest_framework',
+    'drf_yasg',
     'knox',
     'apps.accounts',
     'apps.feed',

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import json
 
 from django.contrib.auth import get_user_model
@@ -15,8 +13,8 @@ class AccountsViewTest(APITestCase):
     """
 
     def setUp(self) -> None:
-        self.register_url: str = reverse('accounts_register')
-        self.login_url: str = reverse('accounts_login')
+        self.register_url: str = reverse('accounts-register')
+        self.login_url: str = reverse('accounts-login')
 
     def test_register_success_user(self) -> None:
         response = self.client.post(

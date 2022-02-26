@@ -13,13 +13,36 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from __future__ import annotations
-
+from django.conf.urls import url
 from django.contrib import admin
 from django.urls import include
 from django.urls import path
+from drf_yasg import openapi
+from rest_framework import permissions
+from rest_framework.schemas import get_schema_view
 
+schema_view = get_schema_view(
+    openapi.Info(
+        title='Feed Reader API',
+        default_version='v1',
+        description='RSS Reader',
+        contact=openapi.Contact(email='maysragamal@gmail.com'),
+    ),
+    public=True,
+    permission_classes=[permissions.AllowAny],
+)
 urlpatterns = [
     path('admin/', admin.site.urls),
+    url(
+        r'^swagger(?P<format>\.json|\.yaml)$',
+        schema_view.without_ui(cache_timeout=0), name='schema-json',
+    ),
+    url(
+        r'^swagger/$', schema_view.with_ui(
+            'swagger',
+            cache_timeout=0,
+        ), name='schema-swagger-ui',
+    ),
     path('api/v1/auth/', include('apps.accounts.urls')),
+    path('api/v1/', include('apps.feed.urls')),
 ]
