@@ -11,6 +11,7 @@ services:
 
 install:
   - pip install -r requirements.txt
+  - bash ./scripts/init_test.sh
   - docker-compose up -d --build
 
 # command to run tests
