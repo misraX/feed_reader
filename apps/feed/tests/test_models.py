@@ -2,16 +2,19 @@ from __future__ import annotations
 
 from email.utils import parsedate_to_datetime
 
+from django.contrib.auth.models import User
 from django.test import TestCase
 
 from apps.feed.models import Feed
 from apps.feed.models import FeedItem
+from apps.feed.models import UserFeed
 
 
 class ModelTestCase(TestCase):
     def setUp(self) -> None:
         self.feed_model = Feed
         self.feed_item_model = FeedItem
+        self.user_feed_model = UserFeed
         self.feed_data: dict = {
             'name': 'washingtonpost',
             'url': 'http://feeds.washingtonpost.com/rss/world',
@@ -42,3 +45,12 @@ class ModelTestCase(TestCase):
         )
         self.assertEqual(feed_item.title, self.feed_item_data['title'])
         self.assertEqual(feed_item.feed, feed)
+
+    def test_user_feed(self) -> None:
+        feed = self.feed_model.objects.create(**self.feed_data)
+        user = User.objects.create_user(username='string', password='testpass')
+
+        user_feed = self.user_feed_model.objects.create(feed=feed, user=user)
+        self.assertEqual(user_feed.user, user)
+        self.assertEqual(user_feed.feed, feed)
+        self.assertEqual(user_feed.active, True)
