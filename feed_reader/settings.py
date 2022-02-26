@@ -150,3 +150,36 @@ REST_FRAMEWORK = {
         'django_filters.rest_framework.DjangoFilterBackend',
     ),
 }
+SWAGGER_SETTINGS = {
+    'DEFAULT_API_URL': 'http://localhost',
+}
+# LOGGING
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'file_handler_formatter': {
+            'format': '[%(asctime)s] [%(levelname)-2s] [%(name)s] [%(funcName)s] %(message)s',
+        },
+    },
+    'handlers': {
+        'request_logging': {
+            'level': 'DEBUG',
+            'formatter': 'file_handler_formatter',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(f'{BASE_DIR}/logs', 'requests.log'),
+        },
+    },
+    'loggers': {
+        'django.request': {
+            'handlers': ['request_logging'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'django': {
+            'handlers': ['request_logging'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}

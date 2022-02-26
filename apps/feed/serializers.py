@@ -13,4 +13,4 @@ class FeedSerializer(serializers.ModelSerializer):
 class SubscribeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subscribe
-        fields = ('user', 'feed', 'created')
+        fields = ('user', 'feeds', 'created')

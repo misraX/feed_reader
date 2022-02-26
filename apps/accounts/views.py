@@ -4,6 +4,7 @@ from knox.views import LoginView as KnoxLoginView
 from rest_framework import permissions
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.generics import CreateAPIView
+from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny
 
 from apps.accounts.serializers import UserSerializer
@@ -18,8 +19,9 @@ class RegisterView(CreateAPIView):
     serializer_class = UserSerializer
 
 
-class LoginView(KnoxLoginView):
+class LoginView(GenericAPIView, KnoxLoginView):
     permission_classes = (permissions.AllowAny,)
+    serializer_class = AuthTokenSerializer
 
     def post(self, request, format=None):
         serializer = AuthTokenSerializer(data=request.data)

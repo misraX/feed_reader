@@ -2,12 +2,15 @@ from rest_framework import mixins
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.viewsets import ModelViewSet
 
+from apps.feed.models import Feed
+from apps.feed.models import Subscribe
 from apps.feed.serializers import FeedSerializer
 from apps.feed.serializers import SubscribeSerializer
 
 
 class FeedViewSet(ModelViewSet):
     serializer_class = FeedSerializer
+    queryset = Feed.objects.all()
 
 
 class SubscribeViewSet(
@@ -20,3 +23,8 @@ class SubscribeViewSet(
     User Subscriber for any feed
     """
     serializer_class = SubscribeSerializer
+    queryset = Subscribe.objects.all().prefetch_related('feeds')
+
+    def get_queryset(self):
+        if self.request.user.is_authenticated:
+            return self.queryset.filter(user=self.request.user)
