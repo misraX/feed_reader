@@ -1,0 +1,5 @@
+FROM nginx:latest
+
+COPY ./docker/nginx/conf.d/feed_reader_com.conf /etc/nginx/conf.d/feed_reader_com.conf
+
+WORKDIR /srv/web
