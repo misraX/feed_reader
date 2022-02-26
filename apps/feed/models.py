@@ -77,6 +77,10 @@ class UserFeedReader(TimeStampedModel):
             'User',
         ), on_delete=models.CASCADE,
     )
+    feed = models.ForeignKey(
+        Feed, verbose_name='feed',
+        on_delete=models.CASCADE,
+    )
     feed_item = models.ForeignKey(
         FeedItem, verbose_name=_(
             'Feed Item',
