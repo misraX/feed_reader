@@ -28,12 +28,13 @@ services:
       - 'docker/db/.env'
     volumes:
       - db-data:/var/lib/postgresql/data:rw
-
+    ports:
+      - "5432:5432"
   redis:
     image: redis
     volumes:
       - redis_data:/data
 
 volumes:
-  db-data: {}
-  redis_data: {}
+  db-data: { }
+  redis_data: { }
