@@ -5,7 +5,7 @@
 
 1. docker and docker-compose.
 2. virtualenv.
-3. python 3.10 (Tested against python 3.8 and 3.9).
+3. python 3.9 (Tested against python 3.8).
 6. Bash
 
 ### Installation:
