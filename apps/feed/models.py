@@ -9,7 +9,7 @@ from model_utils.models import TimeStampedModel
 class Feed(TimeStampedModel):
     name = models.CharField(_('Name'), max_length=150)
     url = models.URLField(_('URL'), max_length=500, unique=True, db_index=True)
-    last_modified = models.DateTimeField()
+    last_modified = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ['-created']

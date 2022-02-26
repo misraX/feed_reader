@@ -9,13 +9,14 @@ from rest_framework.test import APITestCase
 User = get_user_model()
 
 
-class RegisterViewTest(APITestCase):
+class AccountsViewTest(APITestCase):
     """
     Testing user registration
     """
 
     def setUp(self) -> None:
-        self.register_url = reverse('accounts_register')
+        self.register_url: str = reverse('accounts_register')
+        self.login_url: str = reverse('accounts_login')
 
     def test_register_success_user(self) -> None:
         response = self.client.post(
@@ -74,3 +75,13 @@ class RegisterViewTest(APITestCase):
             },
         )
         self.assertEqual(response.status_code, 400)
+
+    def test_login(self) -> None:
+        User.objects.create_user('string', password='testpass')
+        # user with this email already exist
+        response = self.client.post(
+            self.login_url, {
+                'username': 'string', 'password': 'testpass',
+            },
+        )
+        self.assertEqual(response.status_code, 200)
