@@ -43,11 +43,11 @@ Installing httpie:
 
 - Register user:
 
-`http POST http://localhost:9000/api/v1/auth/register email=testuser@test.com password=mypassword`
+`http POST http://localhost:9000/api/v1/auth/register username=misrax email=testuser@test.com password=mypassword`
 
 - Login user:
 
-`http POST http://localhost:9000/api/v1/auth/login email=testuser@test.com password=mypassword`
+` http POST http://localhost:9000/api/v1/auth/login username=misrax password=mypassword`
 
 will response with user token example: `{ "token": "71d5818eb2cf2ab6c464664b129484b316e48f0c6506dca7bfe2b1fdec1c2c33" }`
 
