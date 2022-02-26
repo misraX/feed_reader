@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/misraX/feed_reader.svg?branch=master)](https://travis-ci.org/misraX/feed_reader)
+[![Build Status](https://travis-ci.org/misraX/feed_reader.svg?branch=main)](https://travis-ci.org/misraX/feed_reader)
 [![codecov](https://codecov.io/gh/misraX/feed_reader/branch/master/graph/badge.svg)](https://codecov.io/gh/misraX/feed_reader)
 
 #### Prerequisite:
