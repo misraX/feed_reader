@@ -1,0 +1,17 @@
+language: python
+
+python:
+  - "3.10"
+
+services:
+  - docker
+
+install:
+  - pip install -r requirements.txt
+  - docker-compose up -d --build
+
+# command to run tests
+script:
+  - ./manage.py makemigrations && ./manage.py migrate
+  - coverage run --source='.' manage.py test
+  - codecov

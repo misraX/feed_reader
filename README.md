@@ -20,6 +20,15 @@ Production build Using docker-compose [nginx, uwsgi, postgresql, redis, django]:
 
 Then head to: `http://localhost/api/v1/docs/`
 
+
+### Testing
+
+`docker-compose exec django python manage.py test`
+
+coverage report
+
+` docker-compose exec django bash -c "coverage run manage.py test && coverage report -m"`
+
 ### API:
 
 API documentations:
