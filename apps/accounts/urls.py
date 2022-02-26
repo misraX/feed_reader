@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from django.urls import path
-from knox.views import LoginView
 from knox.views import LogoutAllView
 from knox.views import LogoutView
 
+from apps.accounts.views import LoginView
 from apps.accounts.views import RegisterView
 
 urlpatterns = [
