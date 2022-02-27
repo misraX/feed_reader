@@ -3,6 +3,13 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from model_utils.models import TimeStampedModel
 
+ETAG = 'etag'
+MODIFIED = 'modified'
+MODIFIED_METHODS_CHOICES = (
+    ('ETAG', ETAG),
+    ('MODIFIED', MODIFIED),
+)
+
 
 class Feed(TimeStampedModel):
     """
@@ -14,6 +21,14 @@ class Feed(TimeStampedModel):
         db_index=True, unique=True,
     )
     last_modified = models.DateTimeField(null=True, blank=True)
+    modified_method = models.CharField(
+        _('Modified method'), choices=MODIFIED_METHODS_CHOICES, null=True, blank=True,
+        max_length=100,
+    )
+    source_etag = models.TextField(_('Etag'), null=True, blank=True)
+    source_modified_at = models.CharField(
+        _('Source modified at'), null=True, blank=True, max_length=500,
+    )
     user = models.ForeignKey(
         User, verbose_name=_(
             'User',
@@ -25,6 +40,10 @@ class Feed(TimeStampedModel):
 
     def __str__(self):
         return f'{self.name} - {self.url}'
+
+
+class FeedItemManage(models.Manager):
+    pass
 
 
 class FeedItem(TimeStampedModel):
@@ -52,6 +71,7 @@ class FeedItem(TimeStampedModel):
         _('Copy Right'), max_length=100, null=True, blank=True,
     )
     image = models.JSONField(_('Image'), null=True, blank=True)
+    objects = FeedItemManage()
 
     class Meta:
         ordering = ['-created', '-pub_date']
