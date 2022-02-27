@@ -6,7 +6,7 @@ from model_utils.models import TimeStampedModel
 
 class Feed(TimeStampedModel):
     """
-    Global Feeds, holds site wide feeds, not registered by any user.
+    Global Feeds, holds site wide feeds, they can be registered by a user or globally without a user
     """
     name = models.CharField(_('Name'), max_length=150)
     url = models.URLField(
@@ -87,8 +87,7 @@ class Subscribe(TimeStampedModel):
 class Reader(TimeStampedModel):
     """
     Same as the subscription model, the user can have one reader board,
-    the reader board can include many feeds' items, there is a hidden logic specially if the
-    user already un-subscribed to a particular feed, the logic
+    the reader board can include many feeds' items
     """
     user = models.OneToOneField(
         User, verbose_name=_(
