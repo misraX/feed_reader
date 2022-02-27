@@ -132,3 +132,41 @@ A modified version of wait_for_postgresql to handle docker delays script [wait.p
 - /api/v1/unsubscribe/<pk>/       apps.feed.views.UnSubscribeViewSet      feed-unsubscribe-detail <br>
 - /api/v1/user/feed-items/        apps.feed.views.UserFeedItemViewSet     feed-item-user-list <br>
 - /api/v1/user/feeds/     apps.feed.views.UserFeedViewSet feed-user-list <br>
+
+```
+----------------------------------------------------------------------
+Ran 8 tests in 1.710s
+
+OK
+Destroying test database for alias 'default'...
+Name                                Stmts   Miss  Cover   Missing
+-----------------------------------------------------------------
+apps/__init__.py                        0      0   100%
+apps/accounts/__init__.py               0      0   100%
+apps/accounts/apps.py                   4      0   100%
+apps/accounts/factories.py              8      0   100%
+apps/accounts/serializers.py           19      1    95%   23
+apps/accounts/tests/__init__.py         0      0   100%
+apps/accounts/tests/test_views.py      28      0   100%
+apps/accounts/urls.py                   6      0   100%
+apps/accounts/views.py                 22      0   100%
+apps/feed/__init__.py                   0      0   100%
+apps/feed/admin.py                      0      0   100%
+apps/feed/apps.py                       4      0   100%
+apps/feed/filters.py                   13      0   100%
+apps/feed/models.py                    40      4    90%   22, 55, 79, 103
+apps/feed/serializers.py               66     30    55%   39-45, 55-58, 70-73, 102-108, 118-121, 133-136
+apps/feed/tests/__init__.py             0      0   100%
+apps/feed/tests/factories.py           36      0   100%
+apps/feed/tests/test_models.py         46      0   100%
+apps/feed/tests/test_views.py          28      0   100%
+apps/feed/urls.py                      19      0   100%
+apps/feed/views.py                     61     13    79%   33-35, 73-79, 102-104
+feed_reader/__init__.py                 0      0   100%
+feed_reader/settings.py                28      0   100%
+feed_reader/test_runner.py              8      0   100%
+feed_reader/urls.py                     9      0   100%
+manage.py                              12      2    83%   12-13
+-----------------------------------------------------------------
+TOTAL                                 457     50    89%
+```
