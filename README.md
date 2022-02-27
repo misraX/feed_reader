@@ -18,8 +18,7 @@ Production build Using docker-compose [nginx, uwsgi, postgresql, redis, django]:
        $ bash ./scripts/init.sh
        $ docker-compose up -d --build
 
-Then head to: `http://localhost/api/v1/docs/`
-
+Then head to: `http://localhost/api/v1/docs/` Swagger docs and play around
 
 ### Testing
 
@@ -35,33 +34,59 @@ API documentations:
 
 `coreapi` with _swagger_ `/api/v1/docs/`.
 
-**Consuming endpoint using httpie:**
-
-Installing httpie:
-
-`pip install httpie`
+**Consuming endpoint using curl:**
 
 - Register user:
 
-`http POST http://localhost:9000/api/v1/auth/register username=misrax email=testuser@test.com password=mypassword`
+`curl -X POST "http://localhost/api/v1/auth/register" -H  "accept: application/json" -H  "Authorization: Token 8b1d8e7ea332611fd85e7e7d75eb9a57cf365b5c7b2d7556805b29d4086c0086" -H  "Content-Type: application/json"  -d "{ \"email\": \"user@example.com\", \"username\": \"string\", \"first_name\": \"string\", \"last_name\": \"string\", \"password\": \"string\"}"`
 
 - Login user:
 
-` http POST http://localhost:9000/api/v1/auth/login username=misrax password=mypassword`
+`curl -X POST "http://localhost/api/v1/auth/login" -H  "accept: application/json" -H  "Authorization: Token 8b1d8e7ea332611fd85e7e7d75eb9a57cf365b5c7b2d7556805b29d4086c0086" -H  "Content-Type: application/json"  -d "{ \"username\": \"string\", \"password\": \"string\"}"`
 
-will response with user token example: `{ "token": "71d5818eb2cf2ab6c464664b129484b316e48f0c6506dca7bfe2b1fdec1c2c33" }`
+will response with user token, as follows:
 
-- Follow and unfollow multiple feeds:
+```
+{
+  "expiry": "2022-02-28T04:00:10.070966Z",
+  "token": "aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088"
+}
+```
 
-- List all feeds registered by them:
+- Follow/Subscribe to multiple feeds: "For the first time it will create a subscription, and then use PUT to update the
+  existing subscription"<br>
+  `curl -X POST "http://localhost/api/v1/subscribe/" -H  "accept: application/json" -H  "Authorization: Token 8b1d8e7ea332611fd85e7e7d75eb9a57cf365b5c7b2d7556805b29d4086c0086" -H  "Content-Type: application/json"  -d "{ \"feeds\": [3]}"`
 
-- List feed items belonging to one feed:
-http "http://localhost/api/v1/feed-item/?feed=3" "Authorization:Token 8b1d8e7ea332611fd85e7e7d75eb9a57cf365b5c7b2d7556805b29d4086c0086"
+- Follow/Update an existing subscription, one or many feeds<br>
+  `curl -X PUT "http://localhost/api/v1/subscribe/1/" -H  "accept: application/json" -H  "Authorization: Token 8b1d8e7ea332611fd85e7e7d75eb9a57cf365b5c7b2d7556805b29d4086c0086" -H  "Content-Type: application/json"  -d "{ \"feeds\": [    12,13,14  ]}"`
 
-- Mark items as read:
+- Unsubscribe/Update an existing subscription, one or many feeds<br>
+  `curl -X PUT "http://localhost/api/v1/unsubscribe/1/" -H  "accept: application/json" -H  "Authorization: Token 8b1d8e7ea332611fd85e7e7d75eb9a57cf365b5c7b2d7556805b29d4086c0086" -H  "Content-Type: application/json" -d "{ \"feeds\": [    5  ]}"`
+-
+- List all feeds registered by them:<br>
+  use user=<pk> filter<br>
+  `curl -X GET "http://localhost/api/v1/feed/?user=1" -H  "accept: application/json" -H  "Authorization: Token 8b1d8e7ea332611fd85e7e7d75eb9a57cf365b5c7b2d7556805b29d4086c0086" `
 
+- List feed items belonging to one feed:<br>
+  use feed=<pk> filter<br>
+  `curl -X GET "http://localhost/api/v1/feed-item/?feed=5" -H  "accept: application/json" -H  "Authorization: Token 8b1d8e7ea332611fd85e7e7d75eb9a57cf365b5c7b2d7556805b29d4086c0086" `
 
-- Filter read/unread feed items per feed and globally (e.g. get all unread items from all feeds or one feed in particular). Order the items by the date of the last update:
+- Mark items as read: "For the first time it will create a reader profile, and then use `PUT` to update the existing
+  reader"<br>
+  `curl -X POST "http://localhost/api/v1/read/" -H  "accept: application/json" -H  "Authorization: Token 8b1d8e7ea332611fd85e7e7d75eb9a57cf365b5c7b2d7556805b29d4086c0086" -H  "Content-Type: application/json"  -d "{ \"items\": [    10  ]}"`
+-
+- Read/Update an existing reader profile<br>
+  `curl -X PUT "http://localhost/api/v1/read/1/" -H  "accept: application/json" -H  "Authorization: Token 8b1d8e7ea332611fd85e7e7d75eb9a57cf365b5c7b2d7556805b29d4086c0086" -H  "Content-Type: application/json"  -d "{ \"items\": [    45  ]}"`
+
+- Unread/Update an existing reader profile<br>
+  `curl -X PUT "http://localhost/api/v1/unread/1/" -H  "accept: application/json" -H  "Authorization: Token 8b1d8e7ea332611fd85e7e7d75eb9a57cf365b5c7b2d7556805b29d4086c0086" -H  "Content-Type: application/json" -d "{ \"items\": [    47  ]}"`
+
+- Filter read/unread feed items per feed and globally (e.g. get all unread items from all feeds or one feed in
+  particular). Order the items by the date of the last update:<br>
+  use read=true/True/1 filter read items<br>
+  `curl -X GET "http://localhost/api/v1/feed-item/?read=true" -H  "accept: application/json" -H  "Authorization: Token 8b1d8e7ea332611fd85e7e7d75eb9a57cf365b5c7b2d7556805b29d4086c0086" `
+  use order=created/-created, order by created date<br>
+  `curl -X GET "http://localhost/api/v1/feed-item/?read=true&order=-created" -H  "accept: application/json" -H  "Authorization: Token 8b1d8e7ea332611fd85e7e7d75eb9a57cf365b5c7b2d7556805b29d4086c0086" `
 
 - Force a feed update:
 
@@ -69,15 +94,9 @@ http "http://localhost/api/v1/feed-item/?feed=3" "Authorization:Token 8b1d8e7ea3
 
 Using `celery` with `redis` to handle email notifications and background scheduler
 
-### Permissions:
+### Authentication:
 
 Default: `IsAuthenticated`
-
-Custom:
-
-- `ObjectOwnerPermission`: Custom Permission to allow only owner of the object to access their data
-
-### Authentication:
 
 Token based authentication using [knox](https://github.com/James1345/django-rest-knox)
 
@@ -114,61 +133,5 @@ leverage the usage of `django-environ` instead of `os.env`
 - redis: redis node <br>
 - nginx: nginx reverse proxy
 
-A modified version of wait_for_postgresql to handle docker delays script [wait.py](https://github.com/agconti/wait-for-postgres/blob/master/wait_for_postgres/wait.py)
-
-### URLs
-
-- /api/v1/auth/login      apps.accounts.views.LoginView   accounts-login <br>
-- /api/v1/auth/logout     knox.views.LogoutView   accounts-logout <br>
-- /api/v1/auth/logout-all knox.views.LogoutAllView        accounts-logout_all <br>
-- /api/v1/auth/register   apps.accounts.views.RegisterView        accounts-register <br>
-- /api/v1/docs/   drf_yasg.views.SchemaView       schema-swagger-ui <br>
-- /api/v1/feed-item/      apps.feed.views.FeedItemViewSet feed-item-list <br>
-- /api/v1/feed/   apps.feed.views.FeedViewSet     feed-list <br>
-- /api/v1/feed/<pk>/      apps.feed.views.FeedViewSet     feed-detail <br>
-- /api/v1/read/   apps.feed.views.ReadViewSet     feed-subscriber-list <br>
-- /api/v1/read/<pk>/      apps.feed.views.ReadViewSet     feed-subscriber-detail <br>
-- /api/v1/subscribe/      apps.feed.views.SubscribeViewSet        feed-subscriber-list <br>
-- /api/v1/subscribe/<pk>/ apps.feed.views.SubscribeViewSet        feed-subscriber-detail <br>
-- /api/v1/unread/<pk>/    apps.feed.views.UnReadViewSet   feed-unsubscribe-detail <br>
-- /api/v1/unsubscribe/<pk>/       apps.feed.views.UnSubscribeViewSet      feed-unsubscribe-detail <br>
-- /api/v1/user/feed-items/        apps.feed.views.UserFeedItemViewSet     feed-item-user-list <br>
-- /api/v1/user/feeds/     apps.feed.views.UserFeedViewSet feed-user-list <br>
-
-```
-----------------------------------------------------------------------
-Ran 8 tests in 1.710s
-
-OK
-Destroying test database for alias 'default'...
-Name                                Stmts   Miss  Cover   Missing
------------------------------------------------------------------
-apps/__init__.py                        0      0   100%
-apps/accounts/__init__.py               0      0   100%
-apps/accounts/apps.py                   4      0   100%
-apps/accounts/factories.py              8      0   100%
-apps/accounts/serializers.py           19      1    95%   23
-apps/accounts/tests/__init__.py         0      0   100%
-apps/accounts/tests/test_views.py      28      0   100%
-apps/accounts/urls.py                   6      0   100%
-apps/accounts/views.py                 22      0   100%
-apps/feed/__init__.py                   0      0   100%
-apps/feed/admin.py                      0      0   100%
-apps/feed/apps.py                       4      0   100%
-apps/feed/filters.py                   13      0   100%
-apps/feed/models.py                    40      4    90%   22, 55, 79, 103
-apps/feed/serializers.py               66     30    55%   39-45, 55-58, 70-73, 102-108, 118-121, 133-136
-apps/feed/tests/__init__.py             0      0   100%
-apps/feed/tests/factories.py           36      0   100%
-apps/feed/tests/test_models.py         46      0   100%
-apps/feed/tests/test_views.py          28      0   100%
-apps/feed/urls.py                      19      0   100%
-apps/feed/views.py                     61     13    79%   33-35, 73-79, 102-104
-feed_reader/__init__.py                 0      0   100%
-feed_reader/settings.py                28      0   100%
-feed_reader/test_runner.py              8      0   100%
-feed_reader/urls.py                     9      0   100%
-manage.py                              12      2    83%   12-13
------------------------------------------------------------------
-TOTAL                                 457     50    89%
-```
+A modified version of wait_for_postgresql to handle docker delays
+script [wait.py](https://github.com/agconti/wait-for-postgres/blob/master/wait_for_postgres/wait.py)
