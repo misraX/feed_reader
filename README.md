@@ -62,7 +62,7 @@ will response with user token and expiry date, as follows:
 
 - Unsubscribe/Update an existing subscription, one or many feeds<br>
   `curl -X PUT "http://localhost/api/v1/unsubscribe/1/" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088" -H  "Content-Type: application/json" -d "{ \"feeds\": [    5  ]}"`
--
+
 - List all feeds registered by them:<br>
   use user=<pk> filter<br>
   `curl -X GET "http://localhost/api/v1/feed/?user=1" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088" `
@@ -74,7 +74,7 @@ will response with user token and expiry date, as follows:
 - Mark items as read: "For the first time it will create a reader profile, and then use `PUT` to update the existing
   reader"<br>
   `curl -X POST "http://localhost/api/v1/read/" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088" -H  "Content-Type: application/json"  -d "{ \"items\": [    10  ]}"`
--
+
 - Read/Update an existing reader profile<br>
   `curl -X PUT "http://localhost/api/v1/read/1/" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088" -H  "Content-Type: application/json"  -d "{ \"items\": [    45  ]}"`
 
