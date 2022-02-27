@@ -6,8 +6,6 @@ from apps.feed.views import ReadViewSet
 from apps.feed.views import SubscribeViewSet
 from apps.feed.views import UnReadViewSet
 from apps.feed.views import UnSubscribeViewSet
-from apps.feed.views import UserFeedItemViewSet
-from apps.feed.views import UserFeedViewSet
 
 router = DefaultRouter()
 router.register(
@@ -32,9 +30,4 @@ router.register(
     basename='feed-unsubscribe',
 )
 
-router.register(r'user/feeds', UserFeedViewSet, basename='feed-user')
-router.register(
-    r'user/feed-items', UserFeedItemViewSet,
-    basename='feed-item-user',
-)
 urlpatterns = router.urls

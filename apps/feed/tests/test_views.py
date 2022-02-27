@@ -11,7 +11,7 @@ from apps.feed.tests.factories import ReaderFactory
 class ReaderViewSetTest(APITestCase):
     def setUp(self) -> None:
         self.login_url: str = reverse('accounts-login')
-        self.feed_item_user_url: str = reverse('feed-item-user-list')
+        self.feed_item_user_url: str = reverse('feed-item-list')
 
     def test_user_reader_feed(self) -> None:
         request: APIClient = self.client

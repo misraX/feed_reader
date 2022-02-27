@@ -24,9 +24,9 @@ class FeedFilterSet(filters.FilterSet):
 
     def filter_subscribed(self, queryset, name, value):
         """
-        This filter should get all the read items from the user's Reader model,
-        All the Reader.objects.get(user=self.request.user).items.all() will be the items
-        that had been marked as read, otherwise, return global feed-items (queryset)
+        This filter should get all the followed feeds from the user's Subscribe model,
+        All the Subscribe.objects.get(user=self.request.user).items.all() will be the feeds
+        that had been followed, otherwise, return global feeds (queryset)
         """
         if value and value is not None and self.request:
             return queryset.filter(id__in=Subscribe.objects.get(user=self.request.user).feeds.all().values('id'))
