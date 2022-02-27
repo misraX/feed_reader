@@ -56,7 +56,6 @@ class UnSubscribeViewSet(
 
 class UserFeedViewSet(mixins.ListModelMixin, GenericViewSet):
     serializer_class = UserFeedSerializer
-    queryset = Subscribe.objects.all().prefetch_related('feeds')
 
     def get_queryset(self) -> QuerySet:
         """
@@ -65,7 +64,7 @@ class UserFeedViewSet(mixins.ListModelMixin, GenericViewSet):
         """
         if self.request.user.is_authenticated:
             try:
-                queryset = self.queryset.get(user=self.request.user)
+                queryset = Subscribe.objects.get(user=self.request.user)
                 feeds_queryset = queryset.feeds.all()
                 return feeds_queryset
             except Subscribe.DoesNotExist:

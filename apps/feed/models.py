@@ -56,6 +56,11 @@ class FeedItem(TimeStampedModel):
 
 
 class Subscribe(TimeStampedModel):
+    """
+    Subscription holds the user's feed subscription,
+    The main idea here is simple, one user can have many feeds
+    but only one subscription, this is a simple subscription mechanism.
+    """
     user = models.OneToOneField(
         User, verbose_name=_(
             'User',
@@ -75,6 +80,11 @@ class Subscribe(TimeStampedModel):
 
 
 class Reader(TimeStampedModel):
+    """
+    Same as the subscription model, the user can have one reader board,
+    the reader board can include many feeds' items, there is a hidden logic specially if the
+    user already un-subscribed to a particular feed, the logic
+    """
     user = models.OneToOneField(
         User, verbose_name=_(
             'User',
