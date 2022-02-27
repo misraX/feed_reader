@@ -64,11 +64,11 @@ will response with user token and expiry date, as follows:
   `curl -X PUT "http://localhost/api/v1/unsubscribe/1/" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088" -H  "Content-Type: application/json" -d "{ \"feeds\": [    5  ]}"`
 
 - List all feeds registered by them:<br>
-  use user=<pk> filter<br>
+  _**use user=<pk> filter**_<br>
   `curl -X GET "http://localhost/api/v1/feed/?user=1" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088" `
 
 - List feed items belonging to one feed:<br>
-  use feed=<pk> filter<br>
+  _**use feed=<pk> filter**_<br>
   `curl -X GET "http://localhost/api/v1/feed-item/?feed=5" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088" `
 
 - Mark items as read: "For the first time it will create a reader profile, and then use `PUT` to update the existing
@@ -83,9 +83,9 @@ will response with user token and expiry date, as follows:
 
 - Filter read/unread feed items per feed and globally (e.g. get all unread items from all feeds or one feed in
   particular). Order the items by the date of the last update:<br>
-  use read=true/True/1 filter read items<br>
+  **_use read=true/True/1 filter read items_**<br>
   `curl -X GET "http://localhost/api/v1/feed-item/?read=true" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088" `
-  use order=created/-created, order by created date<br>
+  **_use order=created/-created, order by created date_**<br>
   `curl -X GET "http://localhost/api/v1/feed-item/?read=true&order=-created" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088" `
 
 - Force a feed update:
