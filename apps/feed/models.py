@@ -14,6 +14,11 @@ class Feed(TimeStampedModel):
         db_index=True, unique=True,
     )
     last_modified = models.DateTimeField(null=True, blank=True)
+    user = models.ForeignKey(
+        User, verbose_name=_(
+            'User',
+        ), null=True, blank=True, on_delete=models.CASCADE,
+    )
 
     class Meta:
         ordering = ['-created']

@@ -11,11 +11,23 @@ class FeedSerializer(serializers.ModelSerializer):
     """
     Feed serializer
     """
+    user = UserSerializer(read_only=True)
 
     class Meta:
         model = Feed
-        fields = ('id', 'name', 'url', 'created', 'last_modified')
-        read_only_fields = ('last_modified', 'created')
+        fields = ('id', 'name', 'url', 'created', 'last_modified', 'user')
+        read_only_fields = ('last_modified', 'created', 'user')
+
+    def create(self, validated_data):
+        """
+        Create a new subscription if it doesn't exist, otherwise return the existing one
+
+        :param validated_data: dict
+        :return: Subscription
+        """
+        user = self.context['request'].user
+        validated_data['user'] = user
+        return super().create(validated_data)
 
 
 class SubscribeSerializer(serializers.ModelSerializer):

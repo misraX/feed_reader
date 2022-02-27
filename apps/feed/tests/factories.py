@@ -33,6 +33,7 @@ class FeedFactory(factory.django.DjangoModelFactory):
 
     name = factory.Iterator([feed['name'] for feed in FEED_LIST])
     url = factory.Iterator([feed['url'] for feed in FEED_LIST])
+    user = factory.SubFactory(UserFactory)
 
 
 def image_sequence(value: int) -> dict:

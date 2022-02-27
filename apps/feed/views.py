@@ -19,6 +19,7 @@ from apps.feed.serializers import UnSubscribeSerializer
 
 class FeedViewSet(ModelViewSet):
     serializer_class = FeedSerializer
+    filterset_class = FeedFilterSet
     queryset = Feed.objects.all()
 
 
@@ -85,12 +86,6 @@ class FeedItemViewSet(mixins.ListModelMixin, GenericViewSet):
     filterset_class = FeedItemFilterSet
 
 
-class UserFeedItemViewSet(mixins.ListModelMixin, GenericViewSet):
-    serializer_class = FeedItemSerializer
-    filterset_class = FeedItemFilterSet
-    queryset = FeedItem.objects.all()
-
-
 class ReaderMixin:
     """
     Common Reader view's mixin for read and un-read
@@ -127,3 +122,22 @@ class UnReadViewSet(
     User Subscriber for any feed
     """
     serializer_class = UnReadSerializer
+
+
+class UserFeedItemViewSet(mixins.ListModelMixin, GenericViewSet):
+    serializer_class = FeedItemSerializer
+    queryset = Reader.objects.all()
+    filterset_class = FeedItemFilterSet
+
+    def get_queryset(self) -> QuerySet:
+        """
+        Filter feed items based on the request.user, and then list all the related feed items
+        :return: QuerySet
+        """
+        if self.request.user.is_authenticated:
+            try:
+                queryset = self.queryset.get(user=self.request.user)
+                feeds_items_queryset = queryset.items.all()
+                return feeds_items_queryset
+            except Reader.DoesNotExist:
+                return FeedItem.objects.none()

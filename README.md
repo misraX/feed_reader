@@ -56,8 +56,10 @@ will response with user token example: `{ "token": "71d5818eb2cf2ab6c464664b1294
 - List all feeds registered by them:
 
 - List feed items belonging to one feed:
+http "http://localhost/api/v1/feed-item/?feed=3" "Authorization:Token 8b1d8e7ea332611fd85e7e7d75eb9a57cf365b5c7b2d7556805b29d4086c0086"
 
 - Mark items as read:
+
 
 - Filter read/unread feed items per feed and globally (e.g. get all unread items from all feeds or one feed in particular). Order the items by the date of the last update:
 
