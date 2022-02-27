@@ -5,8 +5,14 @@ from model_utils.models import TimeStampedModel
 
 
 class Feed(TimeStampedModel):
+    """
+    Global Feeds, holds site wide feeds, not registered by any user.
+    """
     name = models.CharField(_('Name'), max_length=150)
-    url = models.URLField(_('URL'), max_length=500, unique=True, db_index=True)
+    url = models.URLField(
+        _('URL'), max_length=500,
+        db_index=True, unique=True,
+    )
     last_modified = models.DateTimeField(null=True, blank=True)
 
     class Meta:
@@ -50,11 +56,10 @@ class FeedItem(TimeStampedModel):
 
 
 class Subscribe(TimeStampedModel):
-    user = models.ForeignKey(
+    user = models.OneToOneField(
         User, verbose_name=_(
             'User',
         ), on_delete=models.CASCADE,
-        unique=True,
     )
     feeds = models.ManyToManyField(
         Feed, verbose_name=_(
@@ -70,7 +75,7 @@ class Subscribe(TimeStampedModel):
 
 
 class Reader(TimeStampedModel):
-    user = models.ForeignKey(
+    user = models.OneToOneField(
         User, verbose_name=_(
             'User',
         ), on_delete=models.CASCADE,

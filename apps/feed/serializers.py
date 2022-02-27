@@ -35,13 +35,13 @@ class SubscribeSerializer(serializers.ModelSerializer):
             return super().create(validated_data)
         return subscription
 
-    def update(self, instance, validated_data):
+    def update(self, instance, validated_data) -> Subscribe:
         """
         Update an existing subscription
 
         :param instance: Subscription
         :param validated_data: dict
-        :return: Subscription
+        :return: Subscribe
         """
         for feed in validated_data['feeds']:
             instance.feeds.add(feed)
@@ -50,7 +50,7 @@ class SubscribeSerializer(serializers.ModelSerializer):
 
 
 class UnSubscribeSerializer(SubscribeSerializer):
-    def update(self, instance: Subscribe, validated_data):
+    def update(self, instance: Subscribe, validated_data: dict) -> Subscribe:
         """
         Update an existing subscription
 
@@ -62,3 +62,7 @@ class UnSubscribeSerializer(SubscribeSerializer):
             instance.feeds.remove(feed)
         instance.save()
         return instance
+
+
+class UserFeedSerializer(FeedSerializer):
+    pass
