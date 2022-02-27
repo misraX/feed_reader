@@ -113,3 +113,22 @@ leverage the usage of `django-environ` instead of `os.env`
 - nginx: nginx reverse proxy
 
 A modified version of wait_for_postgresql to handle docker delays script [wait.py](https://github.com/agconti/wait-for-postgres/blob/master/wait_for_postgres/wait.py)
+
+### URLs
+
+- /api/v1/auth/login      apps.accounts.views.LoginView   accounts-login <br>
+- /api/v1/auth/logout     knox.views.LogoutView   accounts-logout <br>
+- /api/v1/auth/logout-all knox.views.LogoutAllView        accounts-logout_all <br>
+- /api/v1/auth/register   apps.accounts.views.RegisterView        accounts-register <br>
+- /api/v1/docs/   drf_yasg.views.SchemaView       schema-swagger-ui <br>
+- /api/v1/feed-item/      apps.feed.views.FeedItemViewSet feed-item-list <br>
+- /api/v1/feed/   apps.feed.views.FeedViewSet     feed-list <br>
+- /api/v1/feed/<pk>/      apps.feed.views.FeedViewSet     feed-detail <br>
+- /api/v1/read/   apps.feed.views.ReadViewSet     feed-subscriber-list <br>
+- /api/v1/read/<pk>/      apps.feed.views.ReadViewSet     feed-subscriber-detail <br>
+- /api/v1/subscribe/      apps.feed.views.SubscribeViewSet        feed-subscriber-list <br>
+- /api/v1/subscribe/<pk>/ apps.feed.views.SubscribeViewSet        feed-subscriber-detail <br>
+- /api/v1/unread/<pk>/    apps.feed.views.UnReadViewSet   feed-unsubscribe-detail <br>
+- /api/v1/unsubscribe/<pk>/       apps.feed.views.UnSubscribeViewSet      feed-unsubscribe-detail <br>
+- /api/v1/user/feed-items/        apps.feed.views.UserFeedItemViewSet     feed-item-user-list <br>
+- /api/v1/user/feeds/     apps.feed.views.UserFeedViewSet feed-user-list <br>

@@ -5,7 +5,11 @@ from django.test import TestCase
 
 from apps.feed.models import Feed
 from apps.feed.models import FeedItem
+from apps.feed.models import Reader
 from apps.feed.models import Subscribe
+from apps.feed.tests.factories import FEED_LIST
+from apps.feed.tests.factories import FeedItemFactory
+from apps.feed.tests.factories import ReaderFactory
 
 
 class ModelTestCase(TestCase):
@@ -52,3 +56,21 @@ class ModelTestCase(TestCase):
         user_feed.feeds.add(feed)
         self.assertEqual(user_feed.user, user)
         self.assertEqual(user_feed.feeds.get(id=feed.id), feed)
+
+    def test_user_reader_feed(self) -> None:
+        feed_items = FeedItemFactory.create_batch(2)
+        self.assertTrue(
+            feed_items[0].feed.name in [
+                feed['name'] for feed in FEED_LIST
+            ],
+        )
+        readers = ReaderFactory.create_batch(1)  # will create a user
+        # Add feed_items to reader
+        # query db to check
+        reader: Reader = Reader.objects.get(user=readers[0].user)
+        # Add items to reader
+        for item in feed_items:
+            reader.items.add(item)
+        reader.save()
+        reader: Reader = Reader.objects.get(user=readers[0].user)
+        self.assertEqual(reader.items.all().count(), feed_items.__len__())

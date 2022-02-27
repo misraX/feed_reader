@@ -139,7 +139,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.CursorPagination',
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.NamespaceVersioning',
     'PAGE_SIZE': 10,
     'DEFAULT_RENDERER_CLASSES': (
@@ -190,3 +190,6 @@ LOGGING = {
         },
     },
 }
+
+# TESTING
+TEST_RUNNER = 'feed_reader.test_runner.Runner'

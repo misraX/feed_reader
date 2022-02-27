@@ -1,26 +1,42 @@
-from email.utils import parsedate_to_datetime
-
+from django.contrib.auth.models import User
+from django.urls import reverse
+from rest_framework.test import APIClient
 from rest_framework.test import APITestCase
 
-from apps.feed.models import Feed
-from apps.feed.models import FeedItem
-from apps.feed.models import Subscribe
+from apps.feed.models import Reader
+from apps.feed.tests.factories import FeedItemFactory
+from apps.feed.tests.factories import ReaderFactory
 
 
-class SubscribeViewSetTest(APITestCase):
+class ReaderViewSetTest(APITestCase):
     def setUp(self) -> None:
-        self.feed_model = Feed
-        self.feed_item_model = FeedItem
-        self.user_feed_model = Subscribe
-        self.feed_data: dict = {
-            'name': 'washingtonpost',
-            'url': 'http://feeds.washingtonpost.com/rss/world',
-        }
-        self.feed_item_data: dict = {
-            'language': 'en-us',
-            'copyright': 'Copyright 2002, Spartanburg Herald-Journal',
-            'pub_date': str(parsedate_to_datetime('Sat, 07 Sep 2002 0:00:01 GMT')),
-            'title': 'GoUpstate.com News Headlines',
-            'link': 'http://www.goupstate.com/',
-            'description': 'The latest news from GoUpstate.com, a Spartanburg Herald-Journal Web site.',
-        }
+        self.login_url: str = reverse('accounts-login')
+        self.feed_item_user_url: str = reverse('feed-item-user-list')
+
+    def test_user_reader_feed(self) -> None:
+        request: APIClient = self.client
+
+        feed_items = FeedItemFactory.create_batch(2)
+        readers = ReaderFactory.create_batch(1)  # will create a user
+        user: User = readers[0].user
+        # Add feed_items to reader
+        # query db to check
+        reader: Reader = Reader.objects.get(user=user)
+        # Add items to reader
+        for item in feed_items:
+            reader.items.add(item)
+        reader.save()
+        # Login User Reader
+        # Update user password
+        user: User = User.objects.get(username=user.username)
+        user.set_password('password')
+        user.save()
+        response = request.post(
+            self.login_url, {
+                'username': user.username, 'password': 'password',
+            },
+        )
+        token = response.json()['token']
+        request.credentials(HTTP_AUTHORIZATION='Token ' + token)
+        response = request.get(self.feed_item_user_url)
+        print(response.json())
