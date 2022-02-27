@@ -29,7 +29,13 @@ class FeedFilterSet(filters.FilterSet):
         that had been followed, otherwise, return global feeds (queryset)
         """
         if value and value is not None and self.request:
-            return queryset.filter(id__in=Subscribe.objects.get(user=self.request.user).feeds.all().values('id'))
+            try:
+                subscribe_queryset = Subscribe.objects.get(
+                    user=self.request.user,
+                )
+                return queryset.filter(id__in=subscribe_queryset.feeds.all().values('id'))
+            except Subscribe.DoesNotExist:
+                return queryset.none()
         return queryset
 
 
@@ -53,6 +59,11 @@ class FeedItemFilterSet(filters.FilterSet):
         All the Reader.objects.get(user=self.request.user).items.all() will be the items
         that had been marked as read, otherwise, return global feed-items (queryset)
         """
+
         if value and value is not None and self.request:
-            return queryset.filter(id__in=Reader.objects.get(user=self.request.user).items.all().values('id'))
+            try:
+                reader_queryset = Reader.objects.get(user=self.request.user)
+                return queryset.filter(id__in=reader_queryset.items.all().values('id'))
+            except Reader.DoesNotExist:
+                return queryset.none()
         return queryset
