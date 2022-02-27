@@ -64,11 +64,11 @@ will response with user token and expiry date, as follows:
   `curl -X PUT "http://localhost/api/v1/unsubscribe/1/" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088" -H  "Content-Type: application/json" -d "{ \"feeds\": [    5  ]}"`
 
 - List all feeds registered by them:<br>
-  _**use user=<pk> filter**_<br>
+  _**use user=pk filter**_<br>
   `curl -X GET "http://localhost/api/v1/feed/?user=1" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088" `
 
 - List feed items belonging to one feed:<br>
-  _**use feed=<pk> filter**_<br>
+  _**use feed=pk filter**_<br>
   `curl -X GET "http://localhost/api/v1/feed-item/?feed=5" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088" `
 
 - Mark items as read: "For the first time it will create a reader profile, and then use `PUT` to update the existing
