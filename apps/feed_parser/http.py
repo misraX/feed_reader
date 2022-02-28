@@ -1,6 +1,8 @@
 import logging
 from datetime import datetime
 from time import mktime
+from typing import List
+from typing import Tuple
 
 import feedparser
 import pytz
@@ -80,7 +82,7 @@ def check_for_modification(feed: Feed, partial_method: str, parser: FeedParserDi
     feed.save()
 
 
-def parse_feed(feed: Feed) -> tuple[bool, list] | tuple[bool, list]:
+def parse_feed(feed: Feed) -> Tuple[bool, List] | Tuple[bool, List]:
     """
     Parse a given feed and create feed_items
 
