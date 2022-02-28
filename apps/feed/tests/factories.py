@@ -19,6 +19,14 @@ FEED_LIST = [
         'name': 'front-end-feed-smashingmagazine',
         'url': 'https://www.smashingmagazine.com/feed',
     },
+    {
+        'name': 'Algemeen',
+        'url': 'http://www.nu.nl/rss/Algemeen',
+    },
+    {
+        'name': 'tweakers',
+        'url': 'https://feeds.feedburner.com/tweakers/mixed',
+    },
 ]
 
 

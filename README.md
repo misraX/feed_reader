@@ -19,7 +19,18 @@ Production build Using docker-compose [nginx, uwsgi, postgresql, redis, django]:
        $ docker-compose up -d --build
 
 Then head to: `http://localhost/api/v1/docs/` Swagger docs and play around
+### Load Fixtures
 
+```python
+In [1]: from apps.feed_parser.http import parse_feed
+
+In [2]: from apps.feed.tests.factories import FeedFactory
+
+In [4]: with transaction.atomic():
+   ...:     for feed in FeedFactory.create_batch(8):
+   ...:         parse_feed(feed)
+
+```
 ### Testing
 
 `docker-compose exec django python manage.py test`
