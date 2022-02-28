@@ -8,13 +8,34 @@ from apps.feed.models import Reader
 from apps.feed.models import Subscribe
 
 FEED_LIST = [
-    {'name': 'front-end-feed-codrops', 'url': 'https://tympanus.net/codrops/feed/'},
-    {'name': 'front-end-feed-css-tricks', 'url': 'https://css-tricks.com/feed/'},
-    {'name': 'front-end-feed-dev.to', 'url': 'https://dev.to/feed'},
-    {'name': 'front-end-feed-tutsplus', 'url': 'https://code.tutsplus.com/posts.atom'},
-    {'name': 'front-end-feed-hnrss', 'url': 'https://hnrss.org/frontpage'},
-    {'name': 'front-end-feed-hackernoon', 'url': 'https://hackernoon.com/feed'},
-    {'name': 'front-end-feed-sitepoint', 'url': 'https://www.sitepoint.com/feed/'},
+    {
+        'name': 'front-end-feed-codrops',
+        'url': 'https://tympanus.net/codrops/feed/',
+    },
+    {
+        'name': 'front-end-feed-css-tricks',
+        'url': 'https://css-tricks.com/feed/',
+    },
+    {
+        'name': 'front-end-feed-dev.to',
+        'url': 'https://dev.to/feed',
+    },
+    {
+        'name': 'front-end-feed-tutsplus',
+        'url': 'https://code.tutsplus.com/posts.atom',
+    },
+    {
+        'name': 'front-end-feed-hnrss',
+        'url': 'https://hnrss.org/frontpage',
+    },
+    {
+        'name': 'front-end-feed-hackernoon',
+        'url': 'https://hackernoon.com/feed',
+    },
+    {
+        'name': 'front-end-feed-sitepoint',
+        'url': 'https://www.sitepoint.com/feed/',
+    },
     {
         'name': 'front-end-feed-smashingmagazine',
         'url': 'https://www.smashingmagazine.com/feed',
