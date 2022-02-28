@@ -20,12 +20,13 @@ class Feed(TimeStampedModel):
         _('URL'), max_length=500,
         db_index=True, unique=True,
     )
-    last_modified = models.DateTimeField(null=True, blank=True)
     modified_method = models.CharField(
         _('Modified method'), choices=MODIFIED_METHODS_CHOICES, null=True, blank=True,
         max_length=100,
     )
-    source_etag = models.TextField(_('Etag'), null=True, blank=True)
+    source_etag = models.CharField(
+        _('Etag'), null=True, blank=True, max_length=500,
+    )
     source_modified_at = models.CharField(
         _('Source modified at'), null=True, blank=True, max_length=500,
     )

@@ -19,12 +19,12 @@ from apps.feed.serializers import UnSubscribeSerializer
 
 class FeedViewSet(ModelViewSet):
     """
-    List all feeds with filters ['user', 'name', 'url', 'last_modified', 'subscribed', 'order']
+    List all feeds with filters ['user', 'name', 'url', 'modified', 'subscribed', 'order']
     'user': filter all feeds registered by a given user
     'name': filter all feeds by a give name
-    'last_modified': filter all feeds by last_modified date
+    'modified': filter all feeds by modified date
     'subscribed': filter all the followed feeds by the user's Subscribe model
-    'order': order feeds by created, last_modified
+    'order': order feeds by created, modified
     """
     serializer_class = FeedSerializer
     filterset_class = FeedFilterSet

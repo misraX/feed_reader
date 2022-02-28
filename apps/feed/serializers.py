@@ -15,8 +15,8 @@ class FeedSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Feed
-        fields = ('id', 'name', 'url', 'created', 'last_modified', 'user')
-        read_only_fields = ('last_modified', 'created', 'user')
+        fields = '__all__'
+        read_only_fields = ('modified', 'created', 'user')
 
     def create(self, validated_data):
         """

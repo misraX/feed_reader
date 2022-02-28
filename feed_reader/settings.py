@@ -176,6 +176,12 @@ LOGGING = {
             'class': 'logging.FileHandler',
             'filename': os.path.join(f'{BASE_DIR}/logs', 'requests.log'),
         },
+        'feed_parser': {
+            'level': 'INFO',
+            'formatter': 'file_handler_formatter',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(f'{BASE_DIR}/logs', 'feed_parser.log'),
+        },
     },
     'loggers': {
         'django.request': {
@@ -186,6 +192,11 @@ LOGGING = {
         'django': {
             'handlers': ['request_logging'],
             'level': 'DEBUG',
+            'propagate': True,
+        },
+        'feed_parser': {
+            'handlers': ['feed_parser'],
+            'level': 'INFO',
             'propagate': True,
         },
     },

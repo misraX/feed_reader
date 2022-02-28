@@ -10,17 +10,17 @@ from apps.feed.models import Subscribe
 class FeedFilterSet(filters.FilterSet):
     subscribed = filters.BooleanFilter(method='filter_subscribed')
     order = OrderingFilter(
-        fields=('last_modified', 'created'),
+        fields=('modified', 'created'),
 
         field_labels={
-            'last_modified': 'Feed updated at, last modified from the source',
+            'modified': 'Feed updated at, last modified from the source',
             'created': 'List feed by created date',
         },
     )
 
     class Meta:
         model = Feed
-        fields = ['user', 'name', 'url', 'last_modified']
+        fields = ['user', 'name', 'url', 'modified']
 
     def filter_subscribed(self, queryset, name, value):
         """
