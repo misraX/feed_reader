@@ -19,9 +19,12 @@ Production build Using docker-compose [nginx, uwsgi, postgresql, redis, django]:
        $ docker-compose up -d --build
 
 Then head to: `http://localhost/api/v1/docs/` Swagger docs and play around
+
 ### Load Fixtures
 
-```python
+The bellow will populate the system with feed, feed_items, and users
+
+```ipython
 In [1]: from apps.feed_parser.http import parse_feed
 
 In [2]: from apps.feed.tests.factories import FeedFactory
@@ -31,6 +34,33 @@ In [4]: with transaction.atomic():
    ...:         parse_feed(feed)
 
 ```
+
+The loaded feeds are actual live feeds, as follows, the list exists in `apps.feed.test.factories.FEED_LIST`
+
+```python
+FEED_LIST = [
+    {'name': 'front-end-feed-codrops', 'url': 'https://tympanus.net/codrops/feed/'},
+    {'name': 'front-end-feed-css-tricks', 'url': 'https://css-tricks.com/feed/'},
+    {'name': 'front-end-feed-dev.to', 'url': 'https://dev.to/feed'},
+    {'name': 'front-end-feed-tutsplus', 'url': 'https://code.tutsplus.com/posts.atom'},
+    {'name': 'front-end-feed-hnrss', 'url': 'https://hnrss.org/frontpage'},
+    {'name': 'front-end-feed-hackernoon', 'url': 'https://hackernoon.com/feed'},
+    {'name': 'front-end-feed-sitepoint', 'url': 'https://www.sitepoint.com/feed/'},
+    {
+        'name': 'front-end-feed-smashingmagazine',
+        'url': 'https://www.smashingmagazine.com/feed',
+    },
+    {
+        'name': 'Algemeen',
+        'url': 'http://www.nu.nl/rss/Algemeen',
+    },
+    {
+        'name': 'tweakers',
+        'url': 'https://feeds.feedburner.com/tweakers/mixed',
+    },
+]
+```
+
 ### Testing
 
 `docker-compose exec django python manage.py test`
