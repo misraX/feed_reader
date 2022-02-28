@@ -1,8 +1,8 @@
 from django.test.testcases import TestCase
 
 from apps.feed.models import FeedItem
+from apps.feed.parser import parse_feed
 from apps.feed.tests.factories import FeedFactory
-from apps.feed_parser.http import parse_feed
 
 
 class HTTPTest(TestCase):
