@@ -1,3 +1,5 @@
+import feedparser
+from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
 from apps.accounts.serializers import UserSerializer
@@ -5,6 +7,7 @@ from apps.feed.models import Feed
 from apps.feed.models import FeedItem
 from apps.feed.models import Reader
 from apps.feed.models import Subscribe
+from apps.feed.parser import check_for_bozo
 
 
 class FeedSerializer(serializers.ModelSerializer):
@@ -20,14 +23,28 @@ class FeedSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         """
-        Create a new subscription if it doesn't exist, otherwise return the existing one
+        Create a new feed with the request.user
 
         :param validated_data: dict
-        :return: Subscription
+        :return: Feed
         """
         user = self.context['request'].user
         validated_data['user'] = user
         return super().create(validated_data)
+
+    def validate_url(self, value):
+        """
+        Validate the url for bozo flag.
+
+        ref: https://pythonhosted.org/feedparser/bozo.html
+
+        :param value:
+        :return:
+        """
+        feed = feedparser.parse(value)
+        if check_for_bozo(feed):
+            raise serializers.ValidationError(_('Please Enter A Valid Feed'))
+        return value
 
 
 class SubscribeSerializer(serializers.ModelSerializer):
@@ -136,7 +153,7 @@ class ReaderSerializer(serializers.ModelSerializer):
 class UnReadSerializer(ReaderSerializer):
     def update(self, instance: Reader, validated_data: dict) -> Reader:
         """
-        Update an existing reader
+        Update an existing reader to un read
 
         :param instance: Reader
         :param validated_data: dict

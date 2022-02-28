@@ -79,3 +79,35 @@ class SubscribeViewSetTest(BaseViewSetTestMixin, APITestCase):
         self.assertEqual(response.json()['count'], 1)
         response = request.get(self.feed_url + '?subscribed=True')
         self.assertEqual(response.json()['count'], 0)
+
+
+class FeedViewSetTest(BaseViewSetTestMixin, APITestCase):
+
+    def test_create_feed(self) -> None:
+        request: APIClient = self.client
+        user: User = User.objects.create_user(
+            username='misrax', password='hello',
+        )
+        response = request.post(
+            self.login_url, {
+                'username': user.username, 'password': 'hello',
+            },
+        )
+        token = response.json()['token']
+        request.credentials(HTTP_AUTHORIZATION='Token ' + token)
+
+        response = request.post(
+            self.feed_url, data={
+                'name': 'hello-feed',
+                'url': 'https://github.com/',
+            },
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['url'], ['Please Enter A Valid Feed'])
+        response = request.post(
+            self.feed_url, data={
+                'name': 'front-end-feed-codrops',
+                'url': 'http://www.nu.nl/rss/Algemeen',
+            },
+        )
+        self.assertEqual(response.status_code, 201)

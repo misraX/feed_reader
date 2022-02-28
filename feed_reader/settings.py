@@ -116,7 +116,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Africa/Cairo'
 
 USE_I18N = True
 
@@ -182,6 +182,12 @@ LOGGING = {
             'class': 'logging.FileHandler',
             'filename': os.path.join(f'{BASE_DIR}/logs', 'feed_parser.log'),
         },
+        'tasks': {
+            'level': 'INFO',
+            'formatter': 'file_handler_formatter',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(f'{BASE_DIR}/logs', 'tasks.log'),
+        },
     },
     'loggers': {
         'django.request': {
@@ -199,8 +205,19 @@ LOGGING = {
             'level': 'INFO',
             'propagate': True,
         },
+        'tasks': {
+            'handlers': ['tasks'],
+            'level': 'INFO',
+            'propagate': True,
+        },
     },
 }
 
 # TESTING
 TEST_RUNNER = 'feed_reader.test_runner.Runner'
+
+# CELERY
+# Celery Configuration Options
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60

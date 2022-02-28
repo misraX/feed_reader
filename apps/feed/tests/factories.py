@@ -9,6 +9,14 @@ from apps.feed.models import Subscribe
 
 FEED_LIST = [
     {
+        'name': 'Algemeen',
+        'url': 'http://www.nu.nl/rss/Algemeen',
+    },
+    {
+        'name': 'tweakers',
+        'url': 'https://feeds.feedburner.com/tweakers/mixed',
+    },
+    {
         'name': 'front-end-feed-codrops',
         'url': 'https://tympanus.net/codrops/feed/',
     },
@@ -39,14 +47,6 @@ FEED_LIST = [
     {
         'name': 'front-end-feed-smashingmagazine',
         'url': 'https://www.smashingmagazine.com/feed',
-    },
-    {
-        'name': 'Algemeen',
-        'url': 'http://www.nu.nl/rss/Algemeen',
-    },
-    {
-        'name': 'tweakers',
-        'url': 'https://feeds.feedburner.com/tweakers/mixed',
     },
 ]
 
