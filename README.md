@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/misraX/feed_reader.svg?branch=main)](https://travis-ci.org/misraX/feed_reader)
-[![codecov](https://codecov.io/gh/misraX/feed_reader/branch/master/graph/badge.svg)](https://codecov.io/gh/misraX/feed_reader)
+[![codecov](https://codecov.io/gh/misraX/feed_reader/branch/main/graph/badge.svg?token=k8C9e5Of1P)](https://codecov.io/gh/misraX/feed_reader)
 
 #### Prerequisite:
 
@@ -140,7 +140,7 @@ will response with user token and expiry date, as follows:
 - Filter read/unread feed items per feed and globally (e.g. get all unread items from all feeds or one feed in
   particular). Order the items by the date of the last update:<br>
   **_use read=true/True/1 filter read items_**<br>
-  `curl -X GET "http://localhost/api/v1/feed-item/?read=true" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088" `
+  `curl -X GET "http://localhost/api/v1/feed-item/?read=true" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088"`<br>
   **_use order=created/-created, order by created date_**<br>
   `curl -X GET "http://localhost/api/v1/feed-item/?read=true&order=-created" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088" `
 
