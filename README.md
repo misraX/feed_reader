@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/misraX/feed_reader.svg?branch=main)](https://travis-ci.org/misraX/feed_reader)
-[![codecov](https://codecov.io/gh/misraX/feed_reader/branch/master/graph/badge.svg)](https://codecov.io/gh/misraX/feed_reader)
+[![codecov](https://codecov.io/gh/misraX/feed_reader/branch/main/graph/badge.svg?token=k8C9e5Of1P)](https://codecov.io/gh/misraX/feed_reader)
 
 #### Prerequisite:
 
