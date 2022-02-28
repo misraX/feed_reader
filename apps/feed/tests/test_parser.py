@@ -5,7 +5,7 @@ from apps.feed.parser import parse_feed
 from apps.feed.tests.factories import FeedFactory
 
 
-class HTTPTest(TestCase):
+class ParserTest(TestCase):
     def test_parse_feed(self):
         feed: list = FeedFactory.create_batch(1)
         parsed, feed_items = parse_feed(feed[0])
