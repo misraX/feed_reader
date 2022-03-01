@@ -7,7 +7,7 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny
 
-from apps.accounts.serializers import UserSerializer
+from apps.accounts.serializers import UserAuthSerializer
 
 
 class RegisterView(CreateAPIView):
@@ -16,7 +16,7 @@ class RegisterView(CreateAPIView):
     """
     model = get_user_model()
     permission_classes = [AllowAny]
-    serializer_class = UserSerializer
+    serializer_class = UserAuthSerializer
 
 
 class LoginView(GenericAPIView, KnoxLoginView):

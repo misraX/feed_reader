@@ -119,3 +119,4 @@ class ReaderFactory(factory.django.DjangoModelFactory):
         model = Reader
 
     user = factory.SubFactory(UserFactory)
+    item = factory.SubFactory(FeedItemFactory)

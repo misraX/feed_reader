@@ -13,6 +13,7 @@ import os.path
 from pathlib import Path
 
 import environ
+from celery.schedules import crontab
 
 root = environ.Path(__file__) - 2
 env = environ.Env(
@@ -46,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_extensions',
     'rest_framework',
+    'django_celery_beat',
     'drf_yasg',
     'knox',
     'apps.accounts',
@@ -182,11 +184,11 @@ LOGGING = {
             'class': 'logging.FileHandler',
             'filename': os.path.join(f'{BASE_DIR}/logs', 'feed_parser.log'),
         },
-        'tasks': {
+        'celery': {
             'level': 'INFO',
             'formatter': 'file_handler_formatter',
             'class': 'logging.FileHandler',
-            'filename': os.path.join(f'{BASE_DIR}/logs', 'tasks.log'),
+            'filename': os.path.join(f'{BASE_DIR}/logs', 'celery.log'),
         },
     },
     'loggers': {
@@ -205,8 +207,8 @@ LOGGING = {
             'level': 'INFO',
             'propagate': True,
         },
-        'tasks': {
-            'handlers': ['tasks'],
+        'celery': {
+            'handlers': ['celery'],
             'level': 'INFO',
             'propagate': True,
         },
@@ -221,3 +223,10 @@ TEST_RUNNER = 'feed_reader.test_runner.Runner'
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
+CELERYD_HIJACK_ROOT_LOGGER = False
+CELERY_BEAT_SCHEDULE = {
+    'debug_task': {
+        'task': 'apps.feed.tasks',
+        'schedule': crontab(),
+    },
+}

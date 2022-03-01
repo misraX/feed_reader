@@ -40,7 +40,7 @@ class Feed(TimeStampedModel):
         ordering = ['-created']
 
     def __str__(self):
-        return f'{self.name} - {self.url}'
+        return f'{self.user.username} | {self.name} - {self.url}'
 
 
 class FeedItemManage(models.Manager):
@@ -108,21 +108,22 @@ class Subscribe(TimeStampedModel):
 class Reader(TimeStampedModel):
     """
     Same as the subscription model, the user can have one reader board,
-    the reader board can include many feeds' items
+    the reader board can include many feeds' item
     """
-    user = models.OneToOneField(
+    user = models.ForeignKey(
         User, verbose_name=_(
             'User',
         ), on_delete=models.CASCADE,
     )
-    items = models.ManyToManyField(
+    item = models.ForeignKey(
         FeedItem, verbose_name=_(
             'Feed Item',
-        ),
+        ), on_delete=models.CASCADE,
     )
 
     class Meta:
         ordering = ['-created']
+        unique_together = ['user', 'item']
 
     def __str__(self):
-        return f'{self.user.username}'
+        return f'{self.user.username} | {self.item}'

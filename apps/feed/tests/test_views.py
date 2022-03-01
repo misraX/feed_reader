@@ -4,10 +4,10 @@ from rest_framework.test import APIClient
 from rest_framework.test import APITestCase
 
 from apps.feed.models import Feed
+from apps.feed.models import FeedItem
 from apps.feed.models import Reader
 from apps.feed.tests.factories import FeedFactory
 from apps.feed.tests.factories import FeedItemFactory
-from apps.feed.tests.factories import ReaderFactory
 
 
 class BaseViewSetTestMixin:
@@ -21,25 +21,20 @@ class ReaderViewSetTest(BaseViewSetTestMixin, APITestCase):
 
     def test_user_reader_feed(self) -> None:
         request: APIClient = self.client
+        user = User.objects.create_user(username='string', password='testpass')
 
-        feed_items: list = FeedItemFactory.create_batch(2)
-        readers = ReaderFactory.create_batch(1)  # will create a user
-        user: User = readers[0].user
-        # Add feed_items to reader
-        # query db to check
-        reader: Reader = Reader.objects.get(user=user)
-        # Add items to reader
-        for item in feed_items:
-            reader.items.add(item)
-        reader.save()
+        FeedItemFactory.create_batch(4)
+        items = FeedItem.objects.all()
+        readers = []
+        for item in items:
+            reader = Reader(item=item, user=user)
+            readers.append(reader)
+        Reader.objects.bulk_create(readers)
         # Login User Reader
         # Update user password
-        user: User = User.objects.get(username=user.username)
-        user.set_password('password')
-        user.save()
         response = request.post(
             self.login_url, {
-                'username': user.username, 'password': 'password',
+                'username': user.username, 'password': 'testpass',
             },
         )
         token = response.json()['token']
@@ -47,13 +42,18 @@ class ReaderViewSetTest(BaseViewSetTestMixin, APITestCase):
         self.assertEqual(response.status_code, 401)
         request.credentials(HTTP_AUTHORIZATION='Token ' + token)
         # Create another batch
-        FeedItemFactory.create_batch(2)
         response = request.get(self.feed_item_user_url)
+        self.assertEqual(response.json()['count'], 4)
+        request.credentials(HTTP_AUTHORIZATION='Token ' + token)
+
+        response = request.get(
+            self.feed_item_user_url
+            + '?read=1', )  # List all read items
         self.assertEqual(response.json()['count'], 4)
         response = request.get(
             self.feed_item_user_url
-            + '?read=True', )  # List all read items
-        self.assertEqual(response.json()['count'], 2)
+            + '?read=0', )  # List all read items
+        self.assertEqual(response.json()['count'], 0)
 
 
 class SubscribeViewSetTest(BaseViewSetTestMixin, APITestCase):
@@ -78,6 +78,11 @@ class SubscribeViewSetTest(BaseViewSetTestMixin, APITestCase):
         response = request.get(self.feed_url)
         self.assertEqual(response.json()['count'], 1)
         response = request.get(self.feed_url + '?subscribed=True')
+        self.assertEqual(response.json()['count'], 0)
+        response = request.get(self.feed_url + '?added_by_me=True')
+        self.assertEqual(response.json()['count'], 1)
+        response = request.get(self.feed_url + '?added_by_me=False')
+        # Exclude added by the user
         self.assertEqual(response.json()['count'], 0)
 
 

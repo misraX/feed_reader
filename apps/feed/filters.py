@@ -1,3 +1,4 @@
+from django.db.models import QuerySet
 from django_filters import OrderingFilter
 from django_filters import rest_framework as filters
 
@@ -9,6 +10,7 @@ from apps.feed.models import Subscribe
 
 class FeedFilterSet(filters.FilterSet):
     subscribed = filters.BooleanFilter(method='filter_subscribed')
+    added_by_me = filters.BooleanFilter(method='filter_added_by_me')
     order = OrderingFilter(
         fields=('modified', 'created'),
 
@@ -20,23 +22,41 @@ class FeedFilterSet(filters.FilterSet):
 
     class Meta:
         model = Feed
-        fields = ['user', 'name', 'url', 'modified']
+        fields = ['name', 'url', 'modified']
 
-    def filter_subscribed(self, queryset, name, value):
+    def filter_subscribed(self, queryset: QuerySet, name, value):
         """
         This filter should get all the followed feeds from the user's Subscribe model,
         All the Subscribe.objects.get(user=self.request.user).items.all() will be the feeds
         that had been followed, otherwise, return global feeds (queryset)
         """
-        if value and value is not None and self.request:
+        if value and value is not None:
             try:
-                subscribe_queryset = Subscribe.objects.get(
+                user_subscription_queryset = Subscribe.objects.get(
                     user=self.request.user,
                 )
-                return queryset.filter(id__in=subscribe_queryset.feeds.all().values('id'))
+                subscribed_queryset = queryset.filter(
+                    id__in=user_subscription_queryset.feeds.all().values('id'),
+                )
+                return subscribed_queryset
             except Subscribe.DoesNotExist:
                 return queryset.none()
         return queryset
+
+    def filter_added_by_me(self, queryset: QuerySet, name, value):
+        """
+        Get all request.user related feeds, the related feeds are the feeds
+        added by the request.user.
+
+        :param queryset: Queryset
+        :param name: str
+        :param value: str
+        :return: Queryset
+        """
+        added_by_me_queryset = Feed.objects.filter(user=self.request.user)
+        if value and value is not None:
+            return added_by_me_queryset
+        return queryset.exclude(user=self.request.user)
 
 
 class FeedItemFilterSet(filters.FilterSet):
@@ -53,17 +73,13 @@ class FeedItemFilterSet(filters.FilterSet):
         model = FeedItem
         fields = ['feed', 'read', 'order']
 
-    def filter_read(self, queryset, name, value):
+    def filter_read(self, queryset: QuerySet, name, value):
         """
         This filter should get all the read items from the user's Reader model,
         All the Reader.objects.get(user=self.request.user).items.all() will be the items
         that had been marked as read, otherwise, return global feed-items (queryset)
         """
-
-        if value and value is not None and self.request:
-            try:
-                reader_queryset = Reader.objects.get(user=self.request.user)
-                return queryset.filter(id__in=reader_queryset.items.all().values('id'))
-            except Reader.DoesNotExist:
-                return queryset.none()
-        return queryset
+        reader_queryset = Reader.objects.filter(user=self.request.user)
+        if value and value is not None:
+            return queryset.filter(id__in=reader_queryset.values('item_id'))
+        return queryset.exclude(id__in=reader_queryset.values('item_id'))

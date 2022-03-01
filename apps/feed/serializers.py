@@ -2,7 +2,6 @@ import feedparser
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
-from apps.accounts.serializers import UserSerializer
 from apps.feed.models import Feed
 from apps.feed.models import FeedItem
 from apps.feed.models import Reader
@@ -14,12 +13,15 @@ class FeedSerializer(serializers.ModelSerializer):
     """
     Feed serializer
     """
-    user = UserSerializer(read_only=True)
 
     class Meta:
         model = Feed
-        fields = '__all__'
-        read_only_fields = ('modified', 'created', 'user')
+        exclude = ('user',)
+        read_only_fields = (
+            'modified', 'created', 'modified_method',
+            'source_etag',
+            'source_modified_at',
+        )
 
     def create(self, validated_data):
         """
@@ -51,7 +53,6 @@ class SubscribeSerializer(serializers.ModelSerializer):
     """
     User subscription serializer
     """
-    user = UserSerializer(read_only=True)
 
     class Meta:
         model = Subscribe
@@ -110,56 +111,32 @@ class FeedItemSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class ReaderSerializer(serializers.ModelSerializer):
+class ReadSerializer(serializers.ModelSerializer):
     """
     User reader serializer
     """
-    user = UserSerializer(read_only=True)
+    item = FeedItemSerializer()
 
     class Meta:
         model = Reader
-        fields = ('id', 'items', 'user')
+        fields = ['id', 'item']
         read_only_fields = ('created',)
 
-    def create(self, validated_data: dict):
-        """
-        Create a new reader if it doesn't exist, otherwise return the existing one
-
-        :param validated_data: dict
-        :return: Reader
-        """
+    def validate_item(self, value):
         user = self.context['request'].user
         try:
-            reader = Reader.objects.get(user=user)
+            Reader.objects.get(item=value, user=user)
+            raise serializers.ValidationError(_('Feed item already exists'))
         except Reader.DoesNotExist:
-            validated_data['user'] = user
-            return super().create(validated_data)
-        return reader
+            return value
 
-    def update(self, instance: Reader, validated_data) -> Reader:
+    def create(self, validated_data):
         """
-        Update an existing reader, from the given items
+        Create a new Read with the request.user
 
-        :param instance: Reader
         :param validated_data: dict
-        :return: Reader
+        :return: Read
         """
-        for item in validated_data['items']:
-            instance.items.add(item)
-        instance.save()
-        return instance
-
-
-class UnReadSerializer(ReaderSerializer):
-    def update(self, instance: Reader, validated_data: dict) -> Reader:
-        """
-        Update an existing reader to un read
-
-        :param instance: Reader
-        :param validated_data: dict
-        :return: Subscription
-        """
-        for item in validated_data['items']:
-            instance.items.remove(item)
-        instance.save()
-        return instance
+        user = self.context['request'].user
+        validated_data['user'] = user
+        return super().create(validated_data)
