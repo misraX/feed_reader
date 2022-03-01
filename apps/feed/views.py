@@ -20,9 +20,8 @@ from apps.feed.serializers import UnSubscribeSerializer
 
 class FeedViewSet(ModelViewSet):
     """
-    List all feeds with filters ['user', 'name', 'url', 'modified', 'subscribed', 'added_by_me' ,'order']
+    List all feeds with filters ['name', 'url', 'modified', 'subscribed', 'added_by_me' ,'order']
 
-    'user': filter all feeds registered by a given user
     'name': filter all feeds by a give name
     'modified': filter all feeds by modified date
     'subscribed': filter all feeds by the subscribed feeds
@@ -37,6 +36,7 @@ class FeedViewSet(ModelViewSet):
 class FeedItemViewSet(mixins.ListModelMixin, GenericViewSet):
     """
     List all feed items with filters ['feed', 'read', 'order']
+
     'read': filter all feed items by items that has been included in the Reader profile
     'feed': filter all feed items by a give feed
     'order': order feed items by created, (creation date)
@@ -73,7 +73,7 @@ class SubscribeViewSet(
     GenericViewSet,
 ):
     """
-    User Subscriber for any feed
+    User Subscriber for one or many feed
     """
     pass
 
@@ -84,7 +84,7 @@ class UnSubscribeViewSet(
     GenericViewSet,
 ):
     """
-    User Un-Subscriber for any feed
+    User Un-Subscriber for one or many feeds
     """
     serializer_class = UnSubscribeSerializer
 
@@ -121,4 +121,3 @@ class UnReadViewSet(
     Unread one or many feed items
     """
     permission_classes = (IsAuthenticated, ObjectOwnerAccessPermission)
-    serializer_class = ReadSerializer

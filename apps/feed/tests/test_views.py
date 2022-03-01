@@ -15,6 +15,7 @@ class BaseViewSetTestMixin:
         self.login_url: str = reverse('accounts-login')
         self.feed_item_user_url: str = reverse('feed-item-list')
         self.feed_url: str = reverse('feed-list')
+        self.subscribe_url: str = reverse('feed-subscriber-list')
 
 
 class ReaderViewSetTest(BaseViewSetTestMixin, APITestCase):
@@ -45,7 +46,6 @@ class ReaderViewSetTest(BaseViewSetTestMixin, APITestCase):
         response = request.get(self.feed_item_user_url)
         self.assertEqual(response.json()['count'], 4)
         request.credentials(HTTP_AUTHORIZATION='Token ' + token)
-
         response = request.get(
             self.feed_item_user_url
             + '?read=1', )  # List all read items
@@ -77,8 +77,17 @@ class SubscribeViewSetTest(BaseViewSetTestMixin, APITestCase):
         # Create another batch
         response = request.get(self.feed_url)
         self.assertEqual(response.json()['count'], 1)
+        print(self.subscribe_url)
         response = request.get(self.feed_url + '?subscribed=True')
         self.assertEqual(response.json()['count'], 0)
+        response = request.post(
+            self.subscribe_url, data={
+                'feeds': [feed[0].pk],
+            },
+        )
+        self.assertEqual(response.status_code, 201)
+        response = request.get(self.feed_url + '?subscribed=True')
+        self.assertEqual(response.json()['count'], 1)
         response = request.get(self.feed_url + '?added_by_me=True')
         self.assertEqual(response.json()['count'], 1)
         response = request.get(self.feed_url + '?added_by_me=False')

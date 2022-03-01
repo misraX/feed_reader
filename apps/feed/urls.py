@@ -24,10 +24,10 @@ router.register(
     r'unsubscribe', UnSubscribeViewSet,
     basename='feed-unsubscribe',
 )
-router.register(r'read', ReaderViewSet, basename='feed-subscriber')
+router.register(r'read', ReaderViewSet, basename='feed-item-read')
 router.register(
     r'unread', UnReadViewSet,
-    basename='feed-unsubscribe',
+    basename='feed-item-unread',
 )
 
 urlpatterns = router.urls

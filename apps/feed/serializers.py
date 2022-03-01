@@ -53,10 +53,9 @@ class SubscribeSerializer(serializers.ModelSerializer):
     """
     User subscription serializer
     """
-
     class Meta:
         model = Subscribe
-        fields = ('id', 'feeds', 'user')
+        fields = ('id', 'feeds')
         read_only_fields = ('created',)
 
     def create(self, validated_data):
@@ -104,7 +103,6 @@ class UnSubscribeSerializer(SubscribeSerializer):
 
 
 class FeedItemSerializer(serializers.ModelSerializer):
-    feed = FeedSerializer(read_only=True)
 
     class Meta:
         model = FeedItem
