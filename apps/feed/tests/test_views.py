@@ -77,7 +77,6 @@ class SubscribeViewSetTest(BaseViewSetTestMixin, APITestCase):
         # Create another batch
         response = request.get(self.feed_url)
         self.assertEqual(response.json()['count'], 1)
-        print(self.subscribe_url)
         response = request.get(self.feed_url + '?subscribed=True')
         self.assertEqual(response.json()['count'], 0)
         response = request.post(
@@ -110,14 +109,6 @@ class FeedViewSetTest(BaseViewSetTestMixin, APITestCase):
         token = response.json()['token']
         request.credentials(HTTP_AUTHORIZATION='Token ' + token)
 
-        response = request.post(
-            self.feed_url, data={
-                'name': 'hello-feed',
-                'url': 'https://github.com/',
-            },
-        )
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json()['url'], ['Please Enter A Valid Feed'])
         response = request.post(
             self.feed_url, data={
                 'name': 'front-end-feed-codrops',

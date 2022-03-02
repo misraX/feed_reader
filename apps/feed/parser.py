@@ -9,10 +9,15 @@ import pytz
 from django.conf import settings
 from feedparser import FeedParserDict
 
+from apps.feed.exceptions import FeedHasBeenDeletedException
+from apps.feed.models import DONE
 from apps.feed.models import ETAG
+from apps.feed.models import FAILED
 from apps.feed.models import Feed
 from apps.feed.models import FeedItem
+from apps.feed.models import FeedUpdateHistory
 from apps.feed.models import MODIFIED
+from apps.feed.models import UPDATING
 
 logger = logging.getLogger('feed_parser')
 
@@ -42,12 +47,14 @@ def check_for_modification(feed: Feed, partial_method: str, parser: FeedParserDi
             feed.save()
 
 
-def parse_feed(feed: Feed) -> FeedParserDict:
+def parse(feed: Feed) -> Tuple[FeedParserDict, bool, Exception]:
     """
+    MUST BE ATOMIC
+
     Parse a given feed and create feed_items
 
     :param feed: Feed
-    :return: tuple[bool, List]
+    :return: FeedParserDict
     """
     feed_url = feed.url
     if feed.modified_method == ETAG:
@@ -56,14 +63,58 @@ def parse_feed(feed: Feed) -> FeedParserDict:
         parser = feedparser.parse(feed_url, modified=feed.source_modified_at)
     else:
         parser = feedparser.parse(feed_url)
-    return parser
+    bozo = parser.get('bozo', False)
+    bozo_exception = parser.get('bozo_exception', None)
+    return parser, bozo, bozo_exception
+
+
+def parse_feed(feed_id: int, user_id: int | None = None):
+    """
+    MUST BE ATOMIC
+
+    :param feed_id: int
+    :param user_id: int | None
+    :return: FeedParserDict
+    """
+    try:
+        feed: Feed = Feed.objects.get(id=feed_id)
+        last_updated = feed.feed_update_history_latest
+        if not last_updated:
+            logger.info(f'Creating FeedUpdateHistory for feed {feed.id}')
+            last_updated: FeedUpdateHistory = FeedUpdateHistory.objects.create(
+                feed=feed,
+            )
+        if last_updated.status not in [FAILED, UPDATING]:
+            parser, bozo, bozo_exception = parse(feed)
+            if bozo:
+                msg = f'{bozo_exception}'
+                last_updated.bozo = True
+                last_updated.errors = {
+                    'error': msg,
+                }
+                last_updated.status = FAILED
+                last_updated.save()
+                logger.error(
+                    f'Updating FeedUpdateHistory for feed {feed.id} failed with {msg}',
+                )
+                raise bozo_exception
+            last_updated.status = UPDATING
+            last_updated.save()
+            logger.error(
+                f'Updating FeedUpdateHistory for feed {feed.id} is {last_updated.status}',
+            )
+            return parser
+    except Feed.DoesNotExist:
+        msg = 'Feed has been deleted/or does not exist'
+        logger.error(msg)
+        raise FeedHasBeenDeletedException(msg)
 
 
 def get_partial_method(parsed_feed: FeedParserDict) -> str:
     """
     Get whether the partial GET is by ETAG or Last-Modified
 
-    :param parsed_feed:
+    :param parsed_feed: FeedParserDict
     :return: str
     """
     method = ETAG
@@ -83,7 +134,7 @@ def check_for_bozo(parser: FeedParserDict) -> int:
     """
     Check for not-well formed feeds
     :param parser: FeedParserDict
-    :return: 0|1
+    :return: int
     """
     return parser['bozo']
 
@@ -109,10 +160,13 @@ def entries_partial_modification(parser: FeedParserDict, feed: Feed) -> Tuple[bo
     return False, entries
 
 
-def create_feed_items(feed: Feed, entries: List) -> List:
+def create_feed_items(feed: Feed, entries: List, parser: FeedParserDict) -> List:
     """
+    MUST BE ATOMIC
+
     Bulk create feed items for a given feed and feed_entries
 
+    :param parser: FeedParserDict
     :param feed: Feed
     :param entries: List
     :return: List
@@ -128,11 +182,14 @@ def create_feed_items(feed: Feed, entries: List) -> List:
             title=entry.get('title'),
             link=entry.get('link'),
             description=entry.get('description'),
-            language=entry.get('language', ''),
+            language=parser.get('feed', {}).get('language', ''),
             item_id=entry.get('id', ''),
-            copyright=entry.get('copyright', ''),
+            copyright=entry.get('rights', ''),
             image=entry.get('image', {}),
         )
         feed_items.append(feed_item)
     FeedItem.objects.bulk_create(feed_items, batch_size=10)
+    feed_history = feed.feed_update_history_latest
+    feed_history.status = DONE
+    feed_history.save()
     return feed_items

@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.db.models import QuerySet
 from rest_framework import mixins
 from rest_framework.permissions import IsAuthenticated
@@ -16,6 +17,7 @@ from apps.feed.serializers import FeedSerializer
 from apps.feed.serializers import ReadSerializer
 from apps.feed.serializers import SubscribeSerializer
 from apps.feed.serializers import UnSubscribeSerializer
+from apps.feed.tasks import update_feed
 
 
 class FeedViewSet(ModelViewSet):
@@ -31,6 +33,11 @@ class FeedViewSet(ModelViewSet):
     serializer_class = FeedSerializer
     filterset_class = FeedFilterSet
     queryset = Feed.objects.all()
+
+    @transaction.atomic
+    def perform_create(self, serializer: FeedSerializer):
+        super().perform_create(serializer)
+        update_feed.apply_async((serializer.data.get('id'),))
 
 
 class FeedItemViewSet(mixins.ListModelMixin, GenericViewSet):

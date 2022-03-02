@@ -1,24 +1,37 @@
-import feedparser
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
 from apps.feed.models import Feed
 from apps.feed.models import FeedItem
+from apps.feed.models import FeedUpdateHistory
 from apps.feed.models import Reader
 from apps.feed.models import Subscribe
-from apps.feed.parser import check_for_bozo
+
+
+class FeedUpdateHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FeedUpdateHistory
+        exclude = ('feed', 'updated_by')
+        read_only_fields = (
+            'modified', 'created', 'status',
+        )
 
 
 class FeedSerializer(serializers.ModelSerializer):
     """
     Feed serializer
     """
+    feed_update_history_latest = FeedUpdateHistorySerializer(
+        allow_null=True, read_only=True,
+    )
 
     class Meta:
         model = Feed
         exclude = ('user',)
         read_only_fields = (
-            'modified', 'created', 'modified_method',
+            'modified',
+            'created',
+            'modified_method',
             'source_etag',
             'source_modified_at',
         )
@@ -34,25 +47,12 @@ class FeedSerializer(serializers.ModelSerializer):
         validated_data['user'] = user
         return super().create(validated_data)
 
-    def validate_url(self, value):
-        """
-        Validate the url for bozo flag.
-
-        ref: https://pythonhosted.org/feedparser/bozo.html
-
-        :param value:
-        :return:
-        """
-        feed = feedparser.parse(value)
-        if check_for_bozo(feed):
-            raise serializers.ValidationError(_('Please Enter A Valid Feed'))
-        return value
-
 
 class SubscribeSerializer(serializers.ModelSerializer):
     """
     User subscription serializer
     """
+
     class Meta:
         model = Subscribe
         fields = ('id', 'feeds')
@@ -103,7 +103,6 @@ class UnSubscribeSerializer(SubscribeSerializer):
 
 
 class FeedItemSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = FeedItem
         fields = '__all__'

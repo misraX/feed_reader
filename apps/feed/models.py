@@ -1,14 +1,54 @@
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from model_utils.models import StatusModel
 from model_utils.models import TimeStampedModel
 
 ETAG = 'etag'
 MODIFIED = 'modified'
+INITIATED = 'initiated'
+UPDATING = 'updating'
+FAILED = 'failed'
+DONE = 'done'
 MODIFIED_METHODS_CHOICES = (
     ('ETAG', ETAG),
     ('MODIFIED', MODIFIED),
 )
+
+FEED_UPDATE_CHOICES = (
+    ('INITIATE', INITIATED),
+    ('UPDATING', UPDATING),
+    ('FAILED', FAILED),
+    ('DONE', DONE),
+)
+
+
+class FeedUpdateHistory(StatusModel, TimeStampedModel):
+    """
+    Holds data related to the update history
+    Feed updates can be done periodically or through a user
+    The periodic tasks is a system update, that means the user will be null.
+    """
+    STATUS = FEED_UPDATE_CHOICES
+    bozo = models.BooleanField(default=False, null=True, blank=True)
+    feed = models.ForeignKey(
+        'Feed', verbose_name=_(
+            'Feed',
+        ), on_delete=models.CASCADE,
+    )
+    errors = models.JSONField(verbose_name=_('Errors'), null=True, blank=True)
+    updated_by = models.ForeignKey(
+        User, verbose_name=_(
+            'Update By',
+        ), on_delete=models.CASCADE, null=True, blank=False,
+    )
+
+    class Meta:
+        ordering = ['-created']
+        get_latest_by = ['-created']
+
+    def __str__(self):
+        return f'{self.feed.name} | {self.feed.url} | {self.modified}'
 
 
 class Feed(TimeStampedModel):
@@ -20,6 +60,11 @@ class Feed(TimeStampedModel):
         _('URL'), max_length=500,
         db_index=True, unique=True,
     )
+    user = models.ForeignKey(
+        User, verbose_name=_(
+            'User',
+        ), null=True, blank=True, on_delete=models.CASCADE,
+    )
     modified_method = models.CharField(
         _('Modified method'), choices=MODIFIED_METHODS_CHOICES, null=True, blank=True,
         max_length=100,
@@ -30,21 +75,23 @@ class Feed(TimeStampedModel):
     source_modified_at = models.CharField(
         _('Source modified at'), null=True, blank=True, max_length=500,
     )
-    user = models.ForeignKey(
-        User, verbose_name=_(
-            'User',
-        ), null=True, blank=True, on_delete=models.CASCADE,
-    )
 
     class Meta:
         ordering = ['-created']
+        get_latest_by = ['-created']
 
     def __str__(self):
         return f'{self.user.username} | {self.name} - {self.url}'
 
-
-class FeedItemManage(models.Manager):
-    pass
+    @property
+    def feed_update_history_latest(self):
+        try:
+            last_updated_history = FeedUpdateHistory.objects.filter(
+                feed=self,
+            ).latest()
+            return last_updated_history
+        except FeedUpdateHistory.DoesNotExist:
+            return {}
 
 
 class FeedItem(TimeStampedModel):
@@ -72,7 +119,6 @@ class FeedItem(TimeStampedModel):
         _('Copy Right'), max_length=100, null=True, blank=True,
     )
     image = models.JSONField(_('Image'), null=True, blank=True)
-    objects = FeedItemManage()
 
     class Meta:
         ordering = ['-created', '-pub_date']
