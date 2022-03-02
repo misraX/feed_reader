@@ -1,8 +1,10 @@
 from django.contrib.auth.models import User
+from django.test.utils import override_settings
 from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework.test import APITestCase
 
+from apps.feed.models import DONE
 from apps.feed.models import Feed
 from apps.feed.models import FeedItem
 from apps.feed.models import Reader
@@ -96,6 +98,7 @@ class SubscribeViewSetTest(BaseViewSetTestMixin, APITestCase):
 
 class FeedViewSetTest(BaseViewSetTestMixin, APITestCase):
 
+    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
     def test_create_feed(self) -> None:
         request: APIClient = self.client
         user: User = User.objects.create_user(
@@ -116,3 +119,10 @@ class FeedViewSetTest(BaseViewSetTestMixin, APITestCase):
             },
         )
         self.assertEqual(response.status_code, 201)
+        feed_update_history = Feed.objects.get(
+            **{
+                'url': 'http://www.nu.nl/rss/Algemeen',
+            },
+        ).feed_update_history_latest()
+        self.assertEqual(feed_update_history.status, DONE)
+        self.assertTrue(FeedItem.objects.all())

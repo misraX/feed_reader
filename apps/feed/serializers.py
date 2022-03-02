@@ -11,7 +11,7 @@ from apps.feed.models import Subscribe
 class FeedUpdateHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = FeedUpdateHistory
-        exclude = ('feed', 'updated_by')
+        exclude = ('feed', 'updated_by', 'errors')
         read_only_fields = (
             'modified', 'created', 'status',
         )

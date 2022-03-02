@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'rest_framework',
     'django_celery_beat',
+    'django_celery_results',
     'drf_yasg',
     'knox',
     'apps.accounts',
@@ -62,6 +63,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'log_request_id.middleware.RequestIDMiddleware',
+
 ]
 
 ROOT_URLCONF = 'feed_reader.urls'
@@ -166,9 +169,14 @@ SWAGGER_SETTINGS = {
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'filters': {
+        'request_id': {
+            '()': 'log_request_id.filters.RequestIDFilter',
+        },
+    },
     'formatters': {
         'file_handler_formatter': {
-            'format': '[%(asctime)s] [%(levelname)-2s] [%(name)s] [%(funcName)s] %(message)s',
+            'format': '%(levelname)s [%(asctime)s] [%(request_id)s] [%(name)s] %(message)s',
         },
     },
     'handlers': {
@@ -176,18 +184,21 @@ LOGGING = {
             'level': 'DEBUG',
             'formatter': 'file_handler_formatter',
             'class': 'logging.FileHandler',
+            'filters': ['request_id'],
             'filename': os.path.join(f'{BASE_DIR}/logs', 'requests.log'),
         },
         'feed_parser': {
             'level': 'INFO',
             'formatter': 'file_handler_formatter',
             'class': 'logging.FileHandler',
+            'filters': ['request_id'],
             'filename': os.path.join(f'{BASE_DIR}/logs', 'feed_parser.log'),
         },
         'celery': {
             'level': 'INFO',
             'formatter': 'file_handler_formatter',
             'class': 'logging.FileHandler',
+            'filters': ['request_id'],
             'filename': os.path.join(f'{BASE_DIR}/logs', 'celery.log'),
         },
     },
@@ -214,7 +225,12 @@ LOGGING = {
         },
     },
 }
-
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://redis:6379',
+    },
+}
 # TESTING
 TEST_RUNNER = 'feed_reader.test_runner.Runner'
 
@@ -223,10 +239,20 @@ TEST_RUNNER = 'feed_reader.test_runner.Runner'
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
-CELERYD_HIJACK_ROOT_LOGGER = False
+# CELERYD_WORKER_HIJACK_ROOT_LOGGER = False
+# CELERY_TASK_ALWAYS_EAGER = True
 CELERY_BEAT_SCHEDULE = {
     'debug_task': {
         'task': 'apps.feed.tasks',
         'schedule': crontab(),
     },
 }
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_CACHE_BACKEND = 'default'
+
+
+# REQUEST TRACING
+
+LOG_REQUEST_ID_HEADER = 'HTTP_X_REQUEST_ID'
+GENERATE_REQUEST_ID_IF_NOT_IN_HEADER = True
+REQUEST_ID_RESPONSE_HEADER = 'HTTP_X_FEED_READER_ID'

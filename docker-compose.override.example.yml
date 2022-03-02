@@ -2,13 +2,6 @@ version: '3.4'
 
 services:
   nginx:
-    build:
-      context: ./
-      dockerfile: docker/Dockerfile.nginx
-    depends_on:
-      - django
-    volumes:
-      - ./static:/srv/web/static:ro
     ports:
       - "80:9000"
 
@@ -26,21 +19,17 @@ services:
       - ./:/srv/web:rw,cached
 
   db:
-    image: postgres:14-alpine
-    env_file:
-      - 'docker/db/.env'
     ports:
       - "5432:5432"
 
   rabbitmq:
-    image: rabbitmq:3.9.13-management-alpine
-
+    ports:
+      - "5672:5672"
+      - "15672:15672"
 
   redis:
-    image: redis
-    volumes:
-      - redis_data:/data
-
+    ports:
+      - "6379:6379"
 
 volumes:
   db-data: { }

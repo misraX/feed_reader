@@ -48,7 +48,7 @@ class FeedUpdateHistory(StatusModel, TimeStampedModel):
         get_latest_by = ['-created']
 
     def __str__(self):
-        return f'{self.feed.name} | {self.feed.url} | {self.modified}'
+        return f'{self.feed.name} | {self.feed.url} | {self.status}'
 
 
 class Feed(TimeStampedModel):
@@ -83,7 +83,6 @@ class Feed(TimeStampedModel):
     def __str__(self):
         return f'{self.user.username} | {self.name} - {self.url}'
 
-    @property
     def feed_update_history_latest(self):
         try:
             last_updated_history = FeedUpdateHistory.objects.filter(

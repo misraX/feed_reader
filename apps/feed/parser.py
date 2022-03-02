@@ -7,6 +7,8 @@ from typing import Tuple
 import feedparser
 import pytz
 from django.conf import settings
+from django.db import transaction
+from django.db.models import QuerySet
 from feedparser import FeedParserDict
 
 from apps.feed.exceptions import FeedHasBeenDeletedException
@@ -78,9 +80,11 @@ def parse_feed(feed_id: int, user_id: int | None = None):
     """
     try:
         feed: Feed = Feed.objects.get(id=feed_id)
-        last_updated = feed.feed_update_history_latest
+        last_updated = feed.feed_update_history_latest()
         if not last_updated:
-            logger.info(f'Creating FeedUpdateHistory for feed {feed.id}')
+            logger.info(
+                f'[FEED PARSER] Creating FeedUpdateHistory for feed {feed.id}',
+            )
             last_updated: FeedUpdateHistory = FeedUpdateHistory.objects.create(
                 feed=feed,
             )
@@ -95,19 +99,45 @@ def parse_feed(feed_id: int, user_id: int | None = None):
                 last_updated.status = FAILED
                 last_updated.save()
                 logger.error(
-                    f'Updating FeedUpdateHistory for feed {feed.id} failed with {msg}',
+                    f'[FEED PARSER] Updating FeedUpdateHistory for feed {feed.id} failed with {msg}',
                 )
                 raise bozo_exception
             last_updated.status = UPDATING
             last_updated.save()
             logger.error(
-                f'Updating FeedUpdateHistory for feed {feed.id} is {last_updated.status}',
+                f'[FEED PARSER] Updating FeedUpdateHistory for feed {feed.id} is {last_updated.status}',
             )
             return parser
     except Feed.DoesNotExist:
-        msg = 'Feed has been deleted/or does not exist'
+        msg = '[FEED PARSER] Feed has been deleted/or does not exist'
         logger.error(msg)
         raise FeedHasBeenDeletedException(msg)
+
+
+def parse_atomic(feed_id: int) -> None:
+    """
+    Atomic creation for parsing and creating feed items.
+    The main usage of this function is inside a celery task, background tasks and periodic tasks
+
+    Points:
+    ---
+    1. Passing the feed_id is better than the feed object and less costly on the message channel,
+     plus if the feed deleted while the task is running
+    2. IF THE FEED DOES NOT EXIST NO POINT FROM BREAKING
+
+    :param feed_id: int
+    :return: None
+    """
+    feed: QuerySet = Feed.objects.none()
+    try:
+        feed: Feed = Feed.objects.get(id=feed_id)
+    except Feed.DoesNotExist:
+        pass
+    parsed_feed = parse_feed(feed.id)
+    with transaction.atomic():
+        modified, entries = entries_partial_modification(parsed_feed, feed)
+        if modified:
+            create_feed_items(feed, entries, parsed_feed)
 
 
 def get_partial_method(parsed_feed: FeedParserDict) -> str:
@@ -189,7 +219,11 @@ def create_feed_items(feed: Feed, entries: List, parser: FeedParserDict) -> List
         )
         feed_items.append(feed_item)
     FeedItem.objects.bulk_create(feed_items, batch_size=10)
-    feed_history = feed.feed_update_history_latest
+    feed_history = feed.feed_update_history_latest()
     feed_history.status = DONE
+
     feed_history.save()
+    logger.error(
+        f'[FEED PARSER] Updating FeedUpdateHistory for feed {feed.id} is {feed_history.status}',
+    )
     return feed_items

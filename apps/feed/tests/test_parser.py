@@ -38,4 +38,4 @@ class ParserTest(TestCase):
             **{'url': 'https://feeds.feedburner1.com/tweakers/mixed'},
         )
         feed_latest_update_history = feed.feed_update_history_latest
-        self.assertEqual(feed_latest_update_history.status, FAILED)
+        self.assertEqual(feed_latest_update_history().status, FAILED)
