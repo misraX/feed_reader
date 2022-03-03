@@ -1,8 +1,9 @@
-from django.contrib.auth.models import User
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from model_utils.models import StatusModel
 from model_utils.models import TimeStampedModel
+
+from apps.accounts.models import User
 
 ETAG = 'etag'
 MODIFIED = 'modified'
@@ -90,7 +91,7 @@ class Feed(TimeStampedModel):
             ).latest()
             return last_updated_history
         except FeedUpdateHistory.DoesNotExist:
-            return {}
+            return FeedUpdateHistory.objects.create(feed=self)
 
 
 class FeedItem(TimeStampedModel):

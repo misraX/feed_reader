@@ -1,13 +1,14 @@
-from django.contrib.auth.models import User
 from django.test.utils import override_settings
 from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework.test import APITestCase
 
+from apps.accounts.models import User
 from apps.feed.models import DONE
 from apps.feed.models import Feed
 from apps.feed.models import FeedItem
 from apps.feed.models import Reader
+from apps.feed.tasks import update_all_feeds
 from apps.feed.tests.factories import FeedFactory
 from apps.feed.tests.factories import FeedItemFactory
 
@@ -24,7 +25,9 @@ class ReaderViewSetTest(BaseViewSetTestMixin, APITestCase):
 
     def test_user_reader_feed(self) -> None:
         request: APIClient = self.client
-        user = User.objects.create_user(username='string', password='testpass')
+        user = User.objects.create_user(
+            username='string', password='testpass', email='misrax@misrax.com',
+        )
 
         FeedItemFactory.create_batch(4)
         items = FeedItem.objects.all()
@@ -98,11 +101,14 @@ class SubscribeViewSetTest(BaseViewSetTestMixin, APITestCase):
 
 class FeedViewSetTest(BaseViewSetTestMixin, APITestCase):
 
-    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
+    @override_settings(
+        CELERY_TASK_ALWAYS_EAGER=True,
+        EMAIL_BACKEND='django.core.mail.backends.filebased.EmailBackend',
+    )
     def test_create_feed(self) -> None:
         request: APIClient = self.client
         user: User = User.objects.create_user(
-            username='misrax', password='hello',
+            username='misrax', password='hello', email='misrax@misrax.com',
         )
         response = request.post(
             self.login_url, {
@@ -126,3 +132,4 @@ class FeedViewSetTest(BaseViewSetTestMixin, APITestCase):
         ).feed_update_history_latest()
         self.assertEqual(feed_update_history.status, DONE)
         self.assertTrue(FeedItem.objects.all())
+        update_all_feeds.apply()

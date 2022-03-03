@@ -19,7 +19,7 @@ services:
     env_file: .env
     depends_on:
       - db
-      - redis
+      - memcached
       - rabbitmq
     command: "/bin/bash /srv/web/start.sh"
     volumes:
@@ -35,12 +35,8 @@ services:
   rabbitmq:
     image: rabbitmq:3.9.13-management-alpine
 
-
-  redis:
-    image: redis
-    volumes:
-      - redis_data:/data
-
+  memcached:
+    image: memcached:alpine3.15
 
 volumes:
   db-data: { }

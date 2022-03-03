@@ -1,7 +1,6 @@
 codecov
 coverage==6.3.2
 Django==3.2.12
-django-celery-beat==2.2.1
 django-celery-results==2.3.0
 django-environ==0.8.1
 django-extensions==3.1.5
@@ -18,6 +17,7 @@ feedparser==6.0.8
 ipython==8.1.0
 pre-commit==2.17.0
 psycopg2==2.9.3
+pymemcache==3.5.1
 pytest==7.0.1
 Redis==4.1.4
 Sphinx==4.4.0

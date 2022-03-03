@@ -20,6 +20,28 @@ from apps.feed.serializers import UnSubscribeSerializer
 from apps.feed.tasks import update_feed
 
 
+class OwnerPermissionViewMixin:
+    """
+    Force ownership of the model instance, to the requested user
+
+    Two layers:
+    1. Permission based, through 403
+    2. Model based, filter the db for the object owner
+    """
+    permission_classes = (IsAuthenticated, ObjectOwnerAccessPermission)
+    INSTANCE = None
+
+    def get_queryset(self) -> QuerySet:
+        """
+        Force the view to get only the request.user subscription
+
+        :return: Queryset
+        """
+        if self.request.user.is_authenticated:
+            return self.queryset.filter(user=self.request.user)
+        return self.INSTANCE.objects.none()
+
+
 class FeedViewSet(ModelViewSet):
     """
     List all feeds with filters ['name', 'url', 'modified', 'subscribed', 'added_by_me' ,'order']
@@ -60,16 +82,6 @@ class SubscriptionMixin:
     serializer_class = SubscribeSerializer
     queryset = Subscribe.objects.all().prefetch_related('feeds')
 
-    def get_queryset(self) -> QuerySet:
-        """
-        Force the view to get only the request.user subscription
-
-        :return: Queryset
-        """
-        if self.request.user.is_authenticated:
-            return self.queryset.filter(user=self.request.user)
-        return Subscribe.objects.none()
-
 
 class SubscribeViewSet(
     SubscriptionMixin,
@@ -96,18 +108,18 @@ class UnSubscribeViewSet(
     serializer_class = UnSubscribeSerializer
 
 
-class ReaderMixin:
+class ReaderViewMixin:
+    """
+    Common user's Reader view mixin
+    """
     serializer_class = ReadSerializer
     queryset = Reader.objects.all()
-
-    def get_queryset(self):
-        if self.request.user.is_authenticated:
-            return self.queryset.filter(user=self.request.user)
-        return Reader.objects.none()
+    INSTANCE = Reader
 
 
 class ReaderViewSet(
-    ReaderMixin,
+    OwnerPermissionViewMixin,
+    ReaderViewMixin,
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
@@ -120,11 +132,30 @@ class ReaderViewSet(
 
 
 class UnReadViewSet(
-    ReaderMixin,
+    OwnerPermissionViewMixin,
+    ReaderViewMixin,
     mixins.DestroyModelMixin,
     GenericViewSet,
 ):
     """
     Unread one or many feed items
     """
-    permission_classes = (IsAuthenticated, ObjectOwnerAccessPermission)
+    pass
+
+
+class ForceUpdateFeedViewSet(OwnerPermissionViewMixin, mixins.RetrieveModelMixin, GenericViewSet):
+    """
+    Force update feed
+    """
+    serializer_class = FeedSerializer
+    queryset = Feed.objects.all()
+
+    def retrieve(self, request, pk, *args, **kwargs):
+        """
+        Force update feed
+
+        The owner of the feed can force updating the feed in an async way.
+        The celery task and model signal will update and notify the user if their is a failure occurred
+        """
+        update_feed.apply_async((pk,))
+        return super().retrieve(request, pk, *args, **kwargs)

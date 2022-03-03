@@ -1,7 +1,9 @@
 from urllib.error import URLError
 
 from django.test.testcases import TestCase
+from django.test.utils import override_settings
 
+from apps.accounts.models import User
 from apps.feed.models import FAILED
 from apps.feed.models import Feed
 from apps.feed.models import FeedItem
@@ -12,6 +14,9 @@ from apps.feed.parser import parse_feed
 from apps.feed.tests.factories import FeedFactory
 
 
+@override_settings(
+    EMAIL_BACKEND='django.core.mail.backends.filebased.EmailBackend',
+)
 class ParserTest(TestCase):
     def test_parse_feed(self):
         feed: list[Feed] = FeedFactory.create_batch(1)
@@ -25,10 +30,15 @@ class ParserTest(TestCase):
         )
 
     def test_parse_feed_failure(self):
+        user = User.objects.create_user(
+            username='string', password='testpass', email='misrax@misrax.com',
+        )
+
         feed: Feed = Feed.objects.create(
             **{
                 'name': 'tweakers',
                 'url': 'https://feeds.feedburner1.com/tweakers/mixed',
+                'user': user,
             },
         )
         self.assertRaises(URLError, parse_feed, feed.id)
@@ -37,5 +47,5 @@ class ParserTest(TestCase):
         feed = Feed.objects.get(
             **{'url': 'https://feeds.feedburner1.com/tweakers/mixed'},
         )
-        feed_latest_update_history = feed.feed_update_history_latest
-        self.assertEqual(feed_latest_update_history().status, FAILED)
+        feed_latest_update_history = feed.feed_update_history_latest()
+        self.assertEqual(feed_latest_update_history.status, FAILED)

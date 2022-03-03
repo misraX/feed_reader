@@ -2,6 +2,7 @@ from rest_framework.routers import DefaultRouter
 
 from apps.feed.views import FeedItemViewSet
 from apps.feed.views import FeedViewSet
+from apps.feed.views import ForceUpdateFeedViewSet
 from apps.feed.views import ReaderViewSet
 from apps.feed.views import SubscribeViewSet
 from apps.feed.views import UnReadViewSet
@@ -29,5 +30,8 @@ router.register(
     r'unread', UnReadViewSet,
     basename='feed-item-unread',
 )
-
+router.register(
+    r'force-update', ForceUpdateFeedViewSet,
+    basename='force-update',
+)
 urlpatterns = router.urls

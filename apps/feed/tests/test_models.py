@@ -1,8 +1,8 @@
 from email.utils import parsedate_to_datetime
 
-from django.contrib.auth.models import User
 from django.test import TestCase
 
+from apps.accounts.models import User
 from apps.feed.models import Feed
 from apps.feed.models import FeedItem
 from apps.feed.models import Reader
@@ -49,7 +49,9 @@ class ModelTestCase(TestCase):
 
     def test_user_feed(self) -> None:
         feed = self.feed_model.objects.create(**self.feed_data)
-        user = User.objects.create_user(username='string', password='testpass')
+        user = User.objects.create_user(
+            username='string', password='testpass', email='misrax@misrax.com',
+        )
 
         user_feed = self.user_feed_model.objects.create(user=user)
         user_feed.feeds.add(feed)
@@ -58,7 +60,9 @@ class ModelTestCase(TestCase):
 
     def test_user_reader_feed(self) -> None:
         feed_items = FeedItemFactory.create_batch(2)
-        user = User.objects.create_user(username='string', password='testpass')
+        user = User.objects.create_user(
+            username='string', password='testpass', email='misrax@misrax.com',
+        )
 
         self.assertTrue(
             feed_items[0].feed.name in [

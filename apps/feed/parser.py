@@ -70,18 +70,20 @@ def parse(feed: Feed) -> Tuple[FeedParserDict, bool, Exception]:
     return parser, bozo, bozo_exception
 
 
-def parse_feed(feed_id: int, user_id: int | None = None):
+def parse_feed(feed_id: int):
     """
     MUST BE ATOMIC
 
     :param feed_id: int
-    :param user_id: int | None
     :return: FeedParserDict
     """
     try:
         feed: Feed = Feed.objects.get(id=feed_id)
         last_updated = feed.feed_update_history_latest()
-        if not last_updated:
+        logger.info(
+            f'[FEED PARSER] Last updated FeedUpdateHistory for feed {feed.id} is {last_updated}',
+        )
+        if last_updated.status == DONE:
             logger.info(
                 f'[FEED PARSER] Creating FeedUpdateHistory for feed {feed.id}',
             )
@@ -92,24 +94,25 @@ def parse_feed(feed_id: int, user_id: int | None = None):
             parser, bozo, bozo_exception = parse(feed)
             if bozo:
                 msg = f'{bozo_exception}'
-                last_updated.bozo = True
+                last_updated.bozo = True  # Mark feed as bozo
                 last_updated.errors = {
                     'error': msg,
                 }
                 last_updated.status = FAILED
                 last_updated.save()
                 logger.error(
-                    f'[FEED PARSER] Updating FeedUpdateHistory for feed {feed.id} failed with {msg}',
+                    f'[FEED PARSER] Updating FeedUpdateHistory for feed '
+                    f'{feed.id} {feed.url} failed with {msg}',
                 )
                 raise bozo_exception
             last_updated.status = UPDATING
             last_updated.save()
-            logger.error(
+            logger.info(
                 f'[FEED PARSER] Updating FeedUpdateHistory for feed {feed.id} is {last_updated.status}',
             )
             return parser
     except Feed.DoesNotExist:
-        msg = '[FEED PARSER] Feed has been deleted/or does not exist'
+        msg = f'[FEED PARSER] Feed has been deleted/or does not exist'
         logger.error(msg)
         raise FeedHasBeenDeletedException(msg)
 
@@ -133,11 +136,25 @@ def parse_atomic(feed_id: int) -> None:
         feed: Feed = Feed.objects.get(id=feed_id)
     except Feed.DoesNotExist:
         pass
-    parsed_feed = parse_feed(feed.id)
-    with transaction.atomic():
-        modified, entries = entries_partial_modification(parsed_feed, feed)
-        if modified:
-            create_feed_items(feed, entries, parsed_feed)
+    if feed:
+        parsed_feed = parse_feed(feed.id)
+        try:
+            with transaction.atomic():
+                modified, entries = entries_partial_modification(
+                    parsed_feed, feed,
+                )
+                if modified:
+                    create_feed_items(feed, entries, parsed_feed)
+        except Exception as error:
+            msg = str(error)
+            update_history = feed.feed_update_history_latest()
+            update_history.status = FAILED
+            update_history.errors = msg
+            update_history.save()
+            logger.error(
+                f'[FEED PARSER] Updating FeedUpdateHistory for feed '
+                f'{feed.id} failed with {msg}',
+            )
 
 
 def get_partial_method(parsed_feed: FeedParserDict) -> str:
@@ -223,7 +240,8 @@ def create_feed_items(feed: Feed, entries: List, parser: FeedParserDict) -> List
     feed_history.status = DONE
 
     feed_history.save()
-    logger.error(
-        f'[FEED PARSER] Updating FeedUpdateHistory for feed {feed.id} is {feed_history.status}',
+    logger.info(
+        f'[FEED PARSER] Updating FeedUpdateHistory for feed {feed.id}'
+        f' is {feed_history.status}',
     )
     return feed_items

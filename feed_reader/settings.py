@@ -13,13 +13,11 @@ import os.path
 from pathlib import Path
 
 import environ
-from celery.schedules import crontab
 
 root = environ.Path(__file__) - 2
 env = environ.Env(
     DEBUG=(bool, False),
     DJANGO_LOG_LEVEL=(str, 'INFO'),
-    CELERY_BROKER_URL=(str, 'redis://127.0.0.1:6379/0'),
 )
 env.read_env(f'{root}/.env')
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -47,7 +45,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_extensions',
     'rest_framework',
-    'django_celery_beat',
     'django_celery_results',
     'drf_yasg',
     'knox',
@@ -64,11 +61,14 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'log_request_id.middleware.RequestIDMiddleware',
-
 ]
 
 ROOT_URLCONF = 'feed_reader.urls'
-
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+EMAIL_FILE_PATH = os.path.join(f'{BASE_DIR}/logs', 'app-messages')
+DEFAULT_FROM_EMAIL = 'noreply@email.com'
+ADMINS = [('misrax', 'misrax.user@email.com')]
+AUTH_USER_MODEL = 'accounts.User'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -176,7 +176,8 @@ LOGGING = {
     },
     'formatters': {
         'file_handler_formatter': {
-            'format': '%(levelname)s [%(asctime)s] [%(request_id)s] [%(name)s] %(message)s',
+            'format': '%(levelname)s [%(asctime)s] [%(request_id)s] [%(filename)s->%(funcName)s():%(lineno)s]'
+                      ' [%(name)s] %(message)s',
         },
     },
     'handlers': {
@@ -201,8 +202,20 @@ LOGGING = {
             'filters': ['request_id'],
             'filename': os.path.join(f'{BASE_DIR}/logs', 'celery.log'),
         },
+        'info': {
+            'level': 'DEBUG',
+            'formatter': 'file_handler_formatter',
+            'class': 'logging.FileHandler',
+            'filters': ['request_id'],
+            'filename': os.path.join(f'{BASE_DIR}/logs', 'info.log'),
+        },
     },
     'loggers': {
+        '': {
+            'handlers': ['info'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
         'django.request': {
             'handlers': ['request_logging'],
             'level': 'DEBUG',
@@ -227,8 +240,8 @@ LOGGING = {
 }
 CACHES = {
     'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://redis:6379',
+        'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',
+        'LOCATION': env.str('CACHE_LOCATION'),
     },
 }
 # TESTING
@@ -239,17 +252,10 @@ TEST_RUNNER = 'feed_reader.test_runner.Runner'
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
-# CELERYD_WORKER_HIJACK_ROOT_LOGGER = False
 # CELERY_TASK_ALWAYS_EAGER = True
-CELERY_BEAT_SCHEDULE = {
-    'debug_task': {
-        'task': 'apps.feed.tasks',
-        'schedule': crontab(),
-    },
-}
+
 CELERY_RESULT_BACKEND = 'django-db'
 CELERY_CACHE_BACKEND = 'default'
-
 
 # REQUEST TRACING
 

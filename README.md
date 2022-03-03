@@ -84,6 +84,11 @@ coverage report
 
 ` docker-compose exec django bash -c "coverage run manage.py test && coverage report -m"`
 
+### CACHING AND QUEUING
+
+Memcached for caching<br>
+RabbiMQ and Celery for asynchronous tasks<br>
+
 ### API:
 
 API documentations:
@@ -149,9 +154,9 @@ will response with user token and expiry date, as follows:
 
 - Force a feed update:
 
-### Background tasks and Schedulers:
+### Background tasks and schedulers:
 
-Using `celery` with `redis` to handle email notifications and background scheduler
+Using `celery` with `rabbitmq` along with `memcached` for results caching and lock handling
 
 ### Authentication:
 
@@ -189,7 +194,8 @@ leverage the usage of `django-environ` instead of `os.env`
 
 - db: postgres <br>
 - django: application server <br>
-- redis: redis node <br>
+- rabbitmq: memcached node <br>
+- memcached: memcached node <br>
 - nginx: nginx reverse proxy
 
 A modified version of wait_for_postgresql to handle docker delays

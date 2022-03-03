@@ -1,5 +1,6 @@
 import factory
-from django.contrib.auth.models import User
+
+from apps.accounts.models import User
 
 
 class UserFactory(factory.django.DjangoModelFactory):
@@ -13,3 +14,4 @@ class UserFactory(factory.django.DjangoModelFactory):
 
     password = factory.PostGenerationMethodCall('set_password', 'password')
     username = factory.Faker('first_name')
+    email = factory.Faker('email')
