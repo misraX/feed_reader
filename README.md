@@ -10,7 +10,7 @@
 
 ### Installation:
 
-Production build Using docker-compose [nginx, uwsgi, postgresql, redis, django]:
+Production build Using docker-compose [nginx, uwsgi, postgresql, memchached, rabbitmq, django]:
 
        # clone the repo
        $ git clone git@github.com:misraX/feed_reader.git
