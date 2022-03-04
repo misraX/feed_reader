@@ -23,8 +23,10 @@ Then head to: `http://localhost/api/v1/docs/` Swagger docs and play around
 ### Load Fixtures
 
 The bellow will populate the system with two feed , feed_items, and users
-```python
 
+```ipython
+In [1]: from apps.feed.tests.factories import FeedFactory
+In [2]: FeedFactory.create_batch(8)
 ```
 
 The loaded feeds are actual live feeds, as follows, the list exists in `apps.feed.test.factories.FEED_LIST`
@@ -229,6 +231,8 @@ Message-ID: <164639815343.39.9929404946278173897@27f075e566ff>
 Feed https://hackernoon.com/feed failed to update, you can still force updating the feed using  /api/v1/force-update/16/
 -------------------------------------------------------------------------------
 ```
+
+**NOTE** `filebased.EmailBackend` is used only for development purpose, any mail providers can be used/or push notification providers
 
 ### Authentication:
 
