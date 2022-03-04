@@ -12,5 +12,4 @@ celery -A feed_reader multi stop worker1  \
 celery -A feed_reader multi start worker1  \
     --pidfile="$HOME/run/celery/%n.pid" \
     --logfile="$HOME/log/celery/%n%I.log"
-
-tail -f /srv/web/logs/uwsgi-err.log
+celery -A feed_reader beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler

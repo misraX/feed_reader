@@ -207,6 +207,7 @@ Using `celery` with `rabbitmq` along with `memcached` for results caching and lo
 2. Retries with celery retries on any exception thrown by the system
 3. Concurrency locks with memcached to ensuring a task is only executed one at a time
 4. Email notification with Django signal upon failure with a link to force-update
+5. Scheduler using celery beat, with celery crontab periodic tasks
 
 ### Notification
 
