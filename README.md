@@ -20,6 +20,71 @@ Production build Using docker-compose [nginx, uwsgi, postgresql, redis, django]:
 
 Then head to: `http://localhost/api/v1/docs/` Swagger docs and play around
 
+### API:
+
+API documentations: `coreapi` with _swagger_ `/api/v1/docs/`.
+
+**Consuming endpoint using curl:**
+
+- Register user:
+
+`curl -X POST "http://localhost/api/v1/auth/register" -H  "accept: application/json" -H  "Content-Type: application/json"  -d "{ \"email\": \"user@example.com\", \"username\": \"string\", \"first_name\": \"string\", \"last_name\": \"string\", \"password\": \"string\"}"`
+
+- Login user:
+
+`curl -X POST "http://localhost/api/v1/auth/login" -H  "accept: application/json" -H  "Content-Type: application/json"  -d "{ \"username\": \"string\", \"password\": \"string\"}"`
+
+will response with user token and expiry date, as follows:
+
+```
+{
+  "expiry": "2022-02-28T04:00:10.070966Z",
+  "token": "aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088"
+}
+```
+
+- Follow/Subscribe to multiple feeds: "For the first time it will create a subscription, and then use PUT to update the
+  existing subscription"<br>
+  `curl -X POST "http://localhost/api/v1/subscribe/" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088" -H  "Content-Type: application/json"  -d "{ \"feeds\": [3]}"`
+
+- Create Feed:<br>
+`curl -X POST "http://localhost/api/v1/feed/" -H  "accept: application/json" -H  "Authorization: Token 5c92f93d2a4ccc097f3b7a90098e78e3bdd86a0f227955a292476047cbdfbf15" -H  "Content-Type: application/json" -d "{  \"name\": \"tweakers\",  \"url\": \"https://feeds.feedburner.com/tweakers/mixed\"}"`
+
+- Follow/Update an existing subscription, one or many feeds<br>
+  `curl -X PUT "http://localhost/api/v1/subscribe/1/" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088" -H  "Content-Type: application/json"  -d "{ \"feeds\": [    12,13,14  ]}"`
+
+- Unsubscribe/Update an existing subscription, one or many feeds<br>
+  `curl -X PUT "http://localhost/api/v1/unsubscribe/1/" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088" -H  "Content-Type: application/json" -d "{ \"feeds\": [    5  ]}"`
+
+- List all feeds registered by them:<br>
+  _**use added_by_me=true/True/1 filter**_<br>
+  `curl -X GET "http://localhost/api/v1/feed/added_by_me=True" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088" `
+
+- List feed items belonging to one feed:<br>
+  _**use feed=pk filter**_<br>
+  `curl -X GET "http://localhost/api/v1/feed-item/?feed=5" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088" `
+
+- Mark items as read: "For the first time it will create a reader profile, and then use `PUT` to update the existing
+  reader"<br>
+  `curl -X POST "http://localhost/api/v1/read/" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088" -H  "Content-Type: application/json"  -d "{ \"items\": [    10  ]}"`
+
+- Read/Update an existing reader profile<br>
+  `curl -X PUT "http://localhost/api/v1/read/1/" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088" -H  "Content-Type: application/json"  -d "{ \"items\": [    45  ]}"`
+
+- Unread/Update an existing reader profile<br>
+  `curl -X PUT "http://localhost/api/v1/unread/1/" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088" -H  "Content-Type: application/json" -d "{ \"items\": [    47  ]}"`
+
+- Filter read/unread feed items per feed and globally (e.g. get all unread items from all feeds or one feed in
+  particular). Order the items by the date of the last update:<br>
+  **_use read=true/True/1 filter read items_**<br>
+  `curl -X GET "http://localhost/api/v1/feed-item/?read=true" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088"`<br>
+  **_use order=created/-created, order by created date_**<br>
+  `curl -X GET "http://localhost/api/v1/feed-item/?read=true&order=-created" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088" `
+
+- Force a feed update:
+
+`curl -X GET "http://localhost/api/v1/force-update/1/" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088"`
+
 ### Load Fixtures
 
 The bellow will populate the system with two feed , feed_items, and users
@@ -133,73 +198,6 @@ TOTAL                                         829     65    92%
 
 Memcached for caching and tasks concurrency<br>
 RabbiMQ and Celery for asynchronous tasks<br>
-
-### API:
-
-API documentations:
-
-`coreapi` with _swagger_ `/api/v1/docs/`.
-
-**Consuming endpoint using curl:**
-
-- Register user:
-
-`curl -X POST "http://localhost/api/v1/auth/register" -H  "accept: application/json" -H  "Content-Type: application/json"  -d "{ \"email\": \"user@example.com\", \"username\": \"string\", \"first_name\": \"string\", \"last_name\": \"string\", \"password\": \"string\"}"`
-
-- Login user:
-
-`curl -X POST "http://localhost/api/v1/auth/login" -H  "accept: application/json" -H  "Content-Type: application/json"  -d "{ \"username\": \"string\", \"password\": \"string\"}"`
-
-will response with user token and expiry date, as follows:
-
-```
-{
-  "expiry": "2022-02-28T04:00:10.070966Z",
-  "token": "aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088"
-}
-```
-
-- Follow/Subscribe to multiple feeds: "For the first time it will create a subscription, and then use PUT to update the
-  existing subscription"<br>
-  `curl -X POST "http://localhost/api/v1/subscribe/" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088" -H  "Content-Type: application/json"  -d "{ \"feeds\": [3]}"`
-
-- Create Feed:<br>
-`curl -X POST "http://localhost/api/v1/feed/" -H  "accept: application/json" -H  "Authorization: Token 5c92f93d2a4ccc097f3b7a90098e78e3bdd86a0f227955a292476047cbdfbf15" -H  "Content-Type: application/json" -d "{  \"name\": \"tweakers\",  \"url\": \"https://feeds.feedburner.com/tweakers/mixed\"}"`
-
-- Follow/Update an existing subscription, one or many feeds<br>
-  `curl -X PUT "http://localhost/api/v1/subscribe/1/" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088" -H  "Content-Type: application/json"  -d "{ \"feeds\": [    12,13,14  ]}"`
-
-- Unsubscribe/Update an existing subscription, one or many feeds<br>
-  `curl -X PUT "http://localhost/api/v1/unsubscribe/1/" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088" -H  "Content-Type: application/json" -d "{ \"feeds\": [    5  ]}"`
-
-- List all feeds registered by them:<br>
-  _**use added_by_me=true/True/1 filter**_<br>
-  `curl -X GET "http://localhost/api/v1/feed/added_by_me=True" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088" `
-
-- List feed items belonging to one feed:<br>
-  _**use feed=pk filter**_<br>
-  `curl -X GET "http://localhost/api/v1/feed-item/?feed=5" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088" `
-
-- Mark items as read: "For the first time it will create a reader profile, and then use `PUT` to update the existing
-  reader"<br>
-  `curl -X POST "http://localhost/api/v1/read/" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088" -H  "Content-Type: application/json"  -d "{ \"items\": [    10  ]}"`
-
-- Read/Update an existing reader profile<br>
-  `curl -X PUT "http://localhost/api/v1/read/1/" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088" -H  "Content-Type: application/json"  -d "{ \"items\": [    45  ]}"`
-
-- Unread/Update an existing reader profile<br>
-  `curl -X PUT "http://localhost/api/v1/unread/1/" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088" -H  "Content-Type: application/json" -d "{ \"items\": [    47  ]}"`
-
-- Filter read/unread feed items per feed and globally (e.g. get all unread items from all feeds or one feed in
-  particular). Order the items by the date of the last update:<br>
-  **_use read=true/True/1 filter read items_**<br>
-  `curl -X GET "http://localhost/api/v1/feed-item/?read=true" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088"`<br>
-  **_use order=created/-created, order by created date_**<br>
-  `curl -X GET "http://localhost/api/v1/feed-item/?read=true&order=-created" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088" `
-
-- Force a feed update:
-
-`curl -X GET "http://localhost/api/v1/force-update/1/" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088"`
 
 ### Background tasks and schedulers:
 
