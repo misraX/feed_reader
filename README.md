@@ -48,7 +48,7 @@ will response with user token and expiry date, as follows:
   `curl -X POST "http://localhost/api/v1/subscribe/" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088" -H  "Content-Type: application/json"  -d "{ \"feeds\": [3]}"`
 
 - Create Feed:<br>
-`curl -X POST "http://localhost/api/v1/feed/" -H  "accept: application/json" -H  "Authorization: Token 5c92f93d2a4ccc097f3b7a90098e78e3bdd86a0f227955a292476047cbdfbf15" -H  "Content-Type: application/json" -d "{  \"name\": \"tweakers\",  \"url\": \"https://feeds.feedburner.com/tweakers/mixed\"}"`
+  `curl -X POST "http://localhost/api/v1/feed/" -H  "accept: application/json" -H  "Authorization: Token 5c92f93d2a4ccc097f3b7a90098e78e3bdd86a0f227955a292476047cbdfbf15" -H  "Content-Type: application/json" -d "{ \"name\": \"tweakers\", \"url\": \"https://feeds.feedburner.com/tweakers/mixed\"}"`
 
 - Follow/Update an existing subscription, one or many feeds<br>
   `curl -X PUT "http://localhost/api/v1/subscribe/1/" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088" -H  "Content-Type: application/json"  -d "{ \"feeds\": [    12,13,14  ]}"`
@@ -152,6 +152,7 @@ Run: `docker-compose exec django python manage.py test`
 - Factories using factory_boy in `apps.feed.tests.factories`
 
 Coverage:
+
 ```
 Name                                        Stmts   Miss  Cover   Missing
 -------------------------------------------------------------------------
@@ -194,6 +195,11 @@ manage.py                                      12      2    83%   12-13
 -------------------------------------------------------------------------
 TOTAL                                         829     65    92%
 ```
+
+### Code quality
+
+Using pre-commits along with flake8, pep8, order-imports, and more check `pre-commit-config.yaml`
+
 ### CACHING AND QUEUING
 
 Memcached for caching and tasks concurrency<br>
@@ -229,7 +235,8 @@ Feed https://hackernoon.com/feed failed to update, you can still force updating 
 -------------------------------------------------------------------------------
 ```
 
-**NOTE** `filebased.EmailBackend` is used only for development purpose, any mail providers can be used/or push notification providers
+**NOTE** `filebased.EmailBackend` is used only for development purpose, any mail providers can be used/or push
+notification providers saved under `logs/app-messages`
 
 ### Authentication:
 
