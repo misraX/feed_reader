@@ -8,7 +8,6 @@ from apps.feed.models import DONE
 from apps.feed.models import Feed
 from apps.feed.models import FeedItem
 from apps.feed.models import Reader
-from apps.feed.tasks import update_all_feeds
 from apps.feed.tests.factories import FeedFactory
 from apps.feed.tests.factories import FeedItemFactory
 
@@ -132,4 +131,3 @@ class FeedViewSetTest(BaseViewSetTestMixin, APITestCase):
         ).feed_update_history_latest()
         self.assertEqual(feed_update_history.status, DONE)
         self.assertTrue(FeedItem.objects.all())
-        update_all_feeds.apply()

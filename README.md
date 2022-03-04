@@ -22,16 +22,8 @@ Then head to: `http://localhost/api/v1/docs/` Swagger docs and play around
 
 ### Load Fixtures
 
-The bellow will populate the system with feed, feed_items, and users
-
-```ipython
-In [1]: from apps.feed_parser.http import parse_feed
-
-In [2]: from apps.feed.tests.factories import FeedFactory
-
-In [4]: with transaction.atomic():
-   ...:     for feed in FeedFactory.create_batch(8):
-   ...:         parse_feed(feed)
+The bellow will populate the system with two feed , feed_items, and users
+```python
 
 ```
 
@@ -40,38 +32,44 @@ The loaded feeds are actual live feeds, as follows, the list exists in `apps.fee
 ```python
 FEED_LIST = [
     {
-        'name': 'front-end-feed-codrops',
-        'url': 'https://tympanus.net/codrops/feed/'},
-    {
-        'name': 'front-end-feed-css-tricks',
-        'url': 'https://css-tricks.com/feed/'},
-    {
-        'name': 'front-end-feed-dev.to',
-        'url': 'https://dev.to/feed'},
-    {
-        'name': 'front-end-feed-tutsplus',
-        'url': 'https://code.tutsplus.com/posts.atom'},
-    {
-        'name': 'front-end-feed-hnrss',
-        'url': 'https://hnrss.org/frontpage'},
-    {
-        'name': 'front-end-feed-hackernoon',
-        'url': 'https://hackernoon.com/feed'},
-    {
-        'name': 'front-end-feed-sitepoint',
-        'url': 'https://www.sitepoint.com/feed/'
-    },
-    {
-        'name': 'front-end-feed-smashingmagazine',
-        'url': 'https://www.smashingmagazine.com/feed',
-    },
-    {
         'name': 'Algemeen',
         'url': 'http://www.nu.nl/rss/Algemeen',
     },
     {
         'name': 'tweakers',
         'url': 'https://feeds.feedburner.com/tweakers/mixed',
+    },
+    {
+        'name': 'front-end-feed-codrops',
+        'url': 'https://tympanus.net/codrops/feed/',
+    },
+    {
+        'name': 'front-end-feed-css-tricks',
+        'url': 'https://css-tricks.com/feed/',
+    },
+    {
+        'name': 'front-end-feed-dev.to',
+        'url': 'https://dev.to/feed',
+    },
+    {
+        'name': 'front-end-feed-tutsplus',
+        'url': 'https://code.tutsplus.com/posts.atom',
+    },
+    {
+        'name': 'front-end-feed-hnrss',
+        'url': 'https://hnrss.org/frontpage',
+    },
+    {
+        'name': 'front-end-feed-hackernoon',
+        'url': 'https://hackernoon.com/feed',
+    },
+    {
+        'name': 'front-end-feed-sitepoint',
+        'url': 'https://www.sitepoint.com/feed/',
+    },
+    {
+        'name': 'front-end-feed-smashingmagazine',
+        'url': 'https://www.smashingmagazine.com/feed',
     },
 ]
 ```
@@ -84,9 +82,56 @@ coverage report
 
 ` docker-compose exec django bash -c "coverage run manage.py test && coverage report -m"`
 
+Factories using factory_boy in `apps.feed.tests.factories`
+
+Eager testing for celery
+
+Coverage:
+```
+Name                                        Stmts   Miss  Cover   Missing
+-------------------------------------------------------------------------
+apps/__init__.py                                0      0   100%
+apps/accounts/__init__.py                       0      0   100%
+apps/accounts/apps.py                           5      0   100%
+apps/accounts/factories.py                      9      0   100%
+apps/accounts/models.py                         9      0   100%
+apps/accounts/serializers.py                   23      1    96%   24
+apps/accounts/tests/__init__.py                 0      0   100%
+apps/accounts/tests/test_views.py              28      0   100%
+apps/accounts/urls.py                           6      0   100%
+apps/accounts/views.py                         22      0   100%
+apps/feed/__init__.py                           1      0   100%
+apps/feed/admin.py                             11      0   100%
+apps/feed/apps.py                               6      0   100%
+apps/feed/exceptions.py                         4      0   100%
+apps/feed/filters.py                           39      1    97%   44
+apps/feed/management/__init__.py                0      0   100%
+apps/feed/management/commands/__init__.py       0      0   100%
+apps/feed/models.py                            71      3    96%   127, 151, 175
+apps/feed/parser.py                           121     24    80%   43-45, 63, 65, 87-90, 115-117, 137-138, 148-154, 175-176, 186, 206-207
+apps/feed/permission.py                         6      1    83%   9
+apps/feed/serializers.py                       67     18    73%   74, 84-87, 99-102, 123-128, 137-139
+apps/feed/signals.py                           14      0   100%
+apps/feed/tasks.py                             42     10    76%   58, 92-100
+apps/feed/tests/__init__.py                     0      0   100%
+apps/feed/tests/factories.py                   38      0   100%
+apps/feed/tests/test_models.py                 46      0   100%
+apps/feed/tests/test_parser.py                 30      0   100%
+apps/feed/tests/test_views.py                  78      0   100%
+apps/feed/urls.py                              17      0   100%
+apps/feed/views.py                             59      5    92%   40-42, 160-161
+feed_reader/__init__.py                         2      0   100%
+feed_reader/celery.py                           6      0   100%
+feed_reader/settings.py                        40      0   100%
+feed_reader/test_runner.py                      8      0   100%
+feed_reader/urls.py                             9      0   100%
+manage.py                                      12      2    83%   12-13
+-------------------------------------------------------------------------
+TOTAL                                         829     65    92%
+```
 ### CACHING AND QUEUING
 
-Memcached for caching<br>
+Memcached for caching and tasks concurrency<br>
 RabbiMQ and Celery for asynchronous tasks<br>
 
 ### API:
@@ -154,9 +199,36 @@ will response with user token and expiry date, as follows:
 
 - Force a feed update:
 
+`curl -X GET "http://localhost/api/v1/force-update/1/" -H  "accept: application/json" -H  "Authorization: Token aa991fca86f8583e5ce4161a3284f6c799572705539be7a9293d7a76c6dd2088"`
+
 ### Background tasks and schedulers:
 
 Using `celery` with `rabbitmq` along with `memcached` for results caching and lock handling
+
+1. Failure backoff with exponential backoff with celery
+2. Retries with celery retries on any exception thrown by the system
+3. Concurrency locks with memcached to ensuring a task is only executed one at a time
+4. Email notification with Django signal upon failure with a link to force-update
+
+### Notification
+
+User will get notified by email of the failures on any feed update, with a link to force update the feed
+
+Sample email
+
+```
+Content-Type: text/plain; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Subject: Feed https://hackernoon.com/feed failed to update
+From: from@example.com
+To: zward@example.net
+Date: Fri, 04 Mar 2022 12:49:13 -0000
+Message-ID: <164639815343.39.9929404946278173897@27f075e566ff>
+
+Feed https://hackernoon.com/feed failed to update, you can still force updating the feed using  /api/v1/force-update/16/
+-------------------------------------------------------------------------------
+```
 
 ### Authentication:
 
@@ -189,6 +261,7 @@ leverage the usage of `django-environ` instead of `os.env`
 ---
 
 `docker-compse.yml`
+`docker-compose.override.yml` for development and testing
 
 **Services:**
 

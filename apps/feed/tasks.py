@@ -76,7 +76,7 @@ def update_feed(self, feed_id: int):
 
 
 @app.task(
-    name='update_all_feed',
+    name='update_all_feeds',
     bind=True,
     autoretry_for=(Exception,),
     retry_backoff=True,
@@ -89,12 +89,12 @@ def update_all_feeds(self):
     :param self: AsyncTask
     :return: None
     """
+    logger.info(f'Feeds update started')
     feeds: QuerySet = Feed.objects.all()
-
-    logger.info(f'Feeds update started: {feeds}')
-
-    for feed in feeds:
-        feed_id = feed.id
-        logger.info(f'Feed update started: {feed_id}')
-        return check_for_lock(self, feed_id)
+    if feeds:
+        for feed in feeds:
+            feed_id = feed.id
+            logger.info(f'Feed update started: {feed_id}')
+            update_feed.apply_async((feed_id,))
     logger.info('Feeds have been updated')
+    return True
