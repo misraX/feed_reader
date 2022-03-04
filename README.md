@@ -78,15 +78,13 @@ FEED_LIST = [
 
 ### Testing
 
-`docker-compose exec django python manage.py test`
+Run: `docker-compose exec django python manage.py test`
 
-coverage report
+- Coverage report
 
 ` docker-compose exec django bash -c "coverage run manage.py test && coverage report -m"`
 
-Factories using factory_boy in `apps.feed.tests.factories`
-
-Eager testing for celery
+- Factories using factory_boy in `apps.feed.tests.factories`
 
 Coverage:
 ```
